@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chromed – Your Discord Selfbot</title>
-  <link rel="icon" type="image/png" href="/icon.png">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 70' fill='none'%3E%3Ccircle cx='35' cy='35' r='34' stroke='%23c0c0c0' stroke-width='2'/%3E%3Cpath d='M20 25h30v20H20z' fill='none' stroke='%23c0c0c0' stroke-width='2'/%3E%3Cpath d='M25 30l10 10-10 10' stroke='%23c0c0c0' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" href="Chromed.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Inter:opsz,wght@14..32,400..700&family=Orbitron:wght@600&family=Roboto+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <style>
@@ -18,224 +17,359 @@
       position: relative;
     }
 
-    /* Fullscreen background GIF */
+    /* Fullscreen GIF background */
     #bg-gif {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 0;
-      background: url('background.gif') center / cover no-repeat;
+      position: fixed; top:0; left:0; width:100vw; height:100vh; z-index:0;
+      background: url('background.gif') center/cover no-repeat;
       pointer-events: none;
     }
-    /* Dark overlay for readability (optional) */
     #bg-gif::after {
-      content: '';
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.35);
+      content: ''; position: absolute; inset:0;
+      background: rgba(0,0,0,0.25); /* subtle dark overlay */
     }
-    /* Light mode overlay adjustment */
     [data-theme="light"] #bg-gif::after {
-      background: rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.35);
     }
 
-    /* Topbar */
+    /* ===== GLASS BASE CLASS ===== */
+    .glass {
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+    }
+    .glass:hover {
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    [data-theme="light"] .glass {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(0,0,0,0.1);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    [data-theme="light"] .glass:hover {
+      border-color: rgba(0,0,0,0.2);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    /* Topbar (glass) */
     .topbar {
-      position:fixed; top:0; left:0; width:100%; padding:16px 40px;
+      position:fixed; top:0; left:0; width:100%; padding:16px 40px; z-index:1000;
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      background: rgba(0,0,0,0.25);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       display:flex; justify-content:space-between; align-items:center;
-      background: rgba(0,0,0,0.85); backdrop-filter:blur(12px);
-      border-bottom:1px solid rgba(255,255,255,0.05); z-index:1000;
     }
-    .topbar .logo { display:flex; align-items:center; gap:10px; font-size:1.3rem; font-weight:900; }
-    .topbar .logo svg { width:32px; height:32px; }
-    .topbar .logo span { background:linear-gradient(135deg,#fff,#aaa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    [data-theme="light"] .topbar {
+      background: rgba(255,255,255,0.3);
+      border-bottom-color: rgba(0,0,0,0.1);
+    }
+    .topbar .logo { display:flex; align-items:center; gap:12px; font-size:1.3rem; font-weight:900; }
+    .topbar .logo img { width:36px; height:36px; border-radius: 8px; }
+    .topbar .logo span {
+      background: linear-gradient(135deg,#ffffff,#c0c0c0); -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent; background-clip:text;
+    }
     .topbar nav { display:flex; align-items:center; gap:28px; }
-    .topbar nav a { color:#aaa; text-decoration:none; font-size:0.95rem; transition:color 0.2s; }
-    .topbar nav a:hover { color:#fff; }
-
-    /* Theme toggle button */
-    .theme-toggle-btn {
-      background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15);
-      border-radius:9999px; padding:0.5rem 1rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;
-      color:#c0c0c0; font-size:0.85rem; font-weight:500; transition: background 0.2s, border-color 0.2s, color 0.2s;
+    .topbar nav a {
+      color:#ccc; text-decoration:none; font-size:0.95rem; transition:color 0.2s;
+      position: relative; padding: 6px 0;
     }
-    .theme-toggle-btn:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.25); color:#fff; }
+    .topbar nav a:hover { color:#fff; }
+    .topbar nav a::after {
+      content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 1.5px;
+      background: #c0c0c0; transition: width 0.3s ease;
+    }
+    .topbar nav a:hover::after { width: 100%; }
+    [data-theme="light"] .topbar nav a { color:#555; }
+    [data-theme="light"] .topbar nav a:hover { color:#000; }
+    [data-theme="light"] .topbar nav a::after { background: #888; }
+
+    /* Theme toggle */
+    .theme-toggle-btn {
+      backdrop-filter: blur(12px); background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.15); border-radius:9999px; padding:0.5rem 1rem;
+      cursor:pointer; display:flex; align-items:center; gap:0.5rem; color:#c0c0c0;
+      font-size:0.85rem; font-weight:500; transition:0.3s;
+    }
+    .theme-toggle-btn:hover { background:rgba(255,255,255,0.15); color:#fff; }
     .toggle-track { display:flex; align-items:center; gap:0.4rem; }
     .toggle-icons { position:relative; width:18px; height:18px; }
-    .sun-icon, .moon-icon { position:absolute; top:0; left:0; transition:opacity 0.3s, transform 0.5s; }
-    [data-theme="dark"] .moon-icon { opacity:1; transform:rotate(0deg); }
+    .sun-icon, .moon-icon { position:absolute; top:0; left:0; transition:0.5s; }
+    [data-theme="dark"] .moon-icon { opacity:1; transform:rotate(0); }
     [data-theme="dark"] .sun-icon { opacity:0; transform:rotate(90deg); }
     [data-theme="light"] .moon-icon { opacity:0; transform:rotate(-90deg); }
-    [data-theme="light"] .sun-icon { opacity:1; transform:rotate(0deg); }
+    [data-theme="light"] .sun-icon { opacity:1; transform:rotate(0); }
     .toggle-label::after { content:'Light'; }
     [data-theme="light"] .toggle-label::after { content:'Dark'; }
-    [data-theme="light"] .theme-toggle-btn { background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.15); color:#333; }
-    [data-theme="light"] .theme-toggle-btn:hover { background:rgba(0,0,0,0.1); border-color:rgba(0,0,0,0.25); color:#000; }
+    [data-theme="light"] .theme-toggle-btn {
+      background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.15); color:#333;
+    }
+    [data-theme="light"] .theme-toggle-btn:hover { background: rgba(0,0,0,0.1); color:#000; }
 
     /* Hero */
     .hero {
       position:relative; z-index:2; min-height:100vh;
-      display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
-      padding:120px 20px 60px;
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      text-align:center; padding:120px 20px 60px;
     }
     .hero h1 {
       font-size:clamp(3.5rem,10vw,6rem); font-weight:900;
       background:linear-gradient(135deg,#ffffff,#c0c0c0,#888888,#c0c0c0);
       background-size:300% 300%;
       -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-      animation:shimmer 3s ease-in-out infinite;
+      animation: shimmer 3s ease-in-out infinite, floatText 6s ease-in-out infinite;
     }
     @keyframes shimmer { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
-    .hero .subtitle { font-size:1.2rem; color:rgba(255,255,255,0.35); margin-top:12px; }
+    @keyframes floatText {
+      0%,100%{ transform: translateY(0px); }
+      50%{ transform: translateY(-8px); }
+    }
+    .hero .subtitle {
+      font-size:1.2rem; color:rgba(255,255,255,0.35); margin-top:12px;
+      animation: fadeInUp 1s ease;
+    }
+    @keyframes fadeInUp {
+      from{ opacity:0; transform: translateY(20px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
 
     /* Stat Cards */
     .stats-section { width:100%; padding:0 clamp(20px,4vw,48px); }
     .stats-row { max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
     .stat-card {
-      position:relative; overflow:hidden; background:linear-gradient(160deg,#131313 0%,#060606 70%);
-      border:1px solid rgba(192,192,192,0.07); border-radius:28px; padding:32px 30px; min-height:220px;
-      display:flex; flex-direction:column; justify-content:flex-start; transform-style:preserve-3d; transition:transform 0.15s ease-out;
+      position:relative; overflow:hidden; min-height:220px; display:flex; flex-direction:column;
+      justify-content:flex-start; transform-style:preserve-3d; transition:transform 0.2s ease;
+      backdrop-filter: blur(20px); background: rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.08); border-radius:32px; padding:32px 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      animation: cardFloat 5s ease-in-out infinite alternate;
     }
-    .stat-card .stat-icon { position:absolute; right:-22px; bottom:-26px; width:150px; height:150px; color:rgba(160,160,160,0.9); pointer-events:none; }
-    .stat-value { font-size:clamp(38px,4.4vw,56px); font-weight:800; color:#fff; letter-spacing:-0.02em; line-height:1; margin-bottom:14px; white-space:nowrap; }
-    .stat-label { font-size:16px; color:#b0b0b0; font-weight:400; }
+    .stat-card:nth-child(odd) { animation-delay: -2s; }
+    @keyframes cardFloat {
+      0%{ transform: translateY(0px); }
+      100%{ transform: translateY(-6px); }
+    }
+    .stat-card:hover {
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+      transform: translateY(-10px) scale(1.02);
+    }
+    [data-theme="light"] .stat-card {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(0,0,0,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    [data-theme="light"] .stat-card:hover {
+      border-color: rgba(0,0,0,0.2);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    .stat-value {
+      font-size:clamp(38px,4.4vw,56px); font-weight:800; color:#fff;
+      letter-spacing:-0.02em; line-height:1; margin-bottom:14px; text-shadow: 0 0 20px rgba(192,192,192,0.3);
+    }
+    .stat-label { font-size:16px; color:#b0b0b0; }
+    .stat-icon { position:absolute; right:-22px; bottom:-26px; width:150px; height:150px; color:rgba(160,160,160,0.7); pointer-events:none; }
+    [data-theme="light"] .stat-value { color:#111; text-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    [data-theme="light"] .stat-label { color:#444; }
 
+    /* Buttons */
     .btn-group { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:50px; }
     .liquid-btn {
       padding:0.9rem 2.2rem; border-radius:9999px; font-weight:600; font-size:1rem;
-      color:#0a0a0a; background:linear-gradient(135deg,#e0e0e0,#808080);
-      border:none; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem;
-      box-shadow:0 10px 20px rgba(192,192,192,0.15);
-      transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s;
+      backdrop-filter: blur(12px); background: rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.2); color:#fff;
+      text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem;
+      box-shadow:0 10px 20px rgba(0,0,0,0.3);
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative; overflow: hidden;
     }
-    .liquid-btn:hover { transform:scale(1.08); box-shadow:0 15px 30px rgba(192,192,192,0.3); }
+    .liquid-btn::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    .liquid-btn:hover::before { left: 100%; }
+    .liquid-btn:hover {
+      transform:scale(1.08); border-color: rgba(255,255,255,0.4);
+      box-shadow:0 15px 30px rgba(0,0,0,0.4);
+    }
     .liquid-btn-outline {
-      background:transparent; color:#e0e0e0; border:2px solid #808080;
+      background: transparent; border:2px solid rgba(255,255,255,0.3);
       box-shadow:0 0 15px rgba(192,192,192,0.1);
     }
-    .liquid-btn-outline:hover { background:rgba(255,255,255,0.05); }
+    [data-theme="light"] .liquid-btn {
+      background: rgba(255,255,255,0.5); border-color: rgba(0,0,0,0.15); color:#222;
+    }
+    [data-theme="light"] .liquid-btn-outline {
+      background: transparent; border-color: #888; color:#333;
+    }
 
-    /* Core Features Bento Grid */
+    /* Bento Grid */
     .features-section {
       position:relative; z-index:2; padding:80px 40px; max-width:1200px; margin:0 auto;
     }
     .features-section h2 {
       font-size:2rem; background:linear-gradient(135deg,#fff,#aaa);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; text-align:center; margin-bottom:40px;
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      text-align:center; margin-bottom:40px;
     }
-    .bento-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:24px; }
+    .bento-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; }
     .bento-card {
-      background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);
-      border-radius:20px; padding:28px; display:flex; flex-direction:column; gap:16px;
-      transition:border-color 0.3s, transform 0.2s; position:relative; overflow:hidden; transform-style:preserve-3d;
+      backdrop-filter: blur(18px); background: rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.06); border-radius:24px;
+      padding:28px; display:flex; flex-direction:column; gap:16px;
+      transition: all 0.3s ease; transform-style:preserve-3d;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      animation: fadeInUp 0.6s ease backwards;
     }
-    .bento-card:hover { border-color:rgba(255,255,255,0.15); transform:translateY(-4px); }
+    .bento-card:nth-child(odd){ animation-delay: 0.1s; }
+    .bento-card:nth-child(even){ animation-delay: 0.2s; }
+    .bento-card:hover {
+      border-color: rgba(255,255,255,0.25);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.05);
+      transform: translateY(-6px);
+    }
+    [data-theme="light"] .bento-card {
+      background: rgba(255,255,255,0.3); border-color: rgba(0,0,0,0.08);
+    }
+    [data-theme="light"] .bento-card:hover {
+      border-color: rgba(0,0,0,0.2);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
     .bento-card svg { width:2.5rem; height:2.5rem; color:#c0c0c0; }
     .bento-card h3 { font-size:1.25rem; font-weight:600; color:#fff; }
     .bento-card p { color:#b0b0b0; font-size:0.9rem; flex:1; }
     .bento-card .demo-area { margin-top:8px; }
     .bento-card button {
-      background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); color:#fff;
-      padding:8px 16px; border-radius:8px; cursor:pointer; font-size:0.85rem; transition:background 0.2s;
+      background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); color:#fff;
+      padding:8px 16px; border-radius:8px; cursor:pointer; font-size:0.85rem;
+      backdrop-filter: blur(4px); transition:0.3s;
     }
-    .bento-card button:hover { background:rgba(255,255,255,0.2); }
-    .font-demo-text { padding:12px; background:rgba(255,255,255,0.05); border-radius:12px; margin-top:8px; font-size:1rem; }
+    .bento-card button:hover { background: rgba(255,255,255,0.25); }
+    [data-theme="light"] .bento-card h3 { color:#222; }
+    [data-theme="light"] .bento-card p { color:#555; }
+    [data-theme="light"] .bento-card button { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color:#333; }
+    [data-theme="light"] .bento-card button:hover { background: rgba(0,0,0,0.1); }
 
-    /* Detailed Feature Grid */
+    /* Feature Grid */
     .feature-grid-section {
-      background:transparent; padding:0 clamp(20px,5vw,80px) 80px; border-top:1px solid rgba(192,192,192,0.08); font-family:inherit;
-      --bg:transparent; --line:rgba(192,192,192,0.08); --num:#808080; --icon:#a0a0a0; --title:#e0e0e0; --body:#b0b0b0; --title-hover:#ffffff;
+      background:transparent; padding:0 clamp(20px,5vw,80px) 80px;
+      border-top:1px solid rgba(255,255,255,0.08);
     }
-    .feature-grid { max-width:1400px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; }
-    .feature { padding:44px 40px 44px 0; border-bottom:1px solid var(--line); opacity:0; transform:translateY(14px); transition:opacity 0.6s ease, transform 0.6s ease; }
+    .feature-grid { max-width:1400px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:0; }
+    .feature {
+      padding:44px 40px 44px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+      opacity:0; transform:translateY(14px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.02);
+      border-radius: 20px; margin: 0 10px 10px;
+    }
     .feature.is-visible { opacity:1; transform:translateY(0); }
     .feature:nth-child(odd) { padding-right:56px; }
-    .feature:nth-child(even) { padding-left:56px; border-left:1px solid transparent; }
-    .feature-num { display:block; font-size:14px; letter-spacing:0.05em; color:var(--num); margin-bottom:18px; font-variant-numeric:tabular-nums; }
+    .feature:nth-child(even) { padding-left:56px; }
+    .feature-num { display:block; font-size:14px; letter-spacing:0.05em; color:#808080; margin-bottom:18px; }
     .feature-head { display:flex; align-items:center; gap:16px; margin-bottom:14px; }
-    .feature-head svg { width:26px; height:26px; color:var(--icon); flex-shrink:0; transition:color 0.35s ease, transform 0.35s ease; }
-    .feature-head h3 { margin:0; font-size:clamp(24px,2.6vw,34px); font-weight:700; color:var(--title); letter-spacing:-0.01em; transition:color 0.35s ease; }
-    .feature p { margin:0; padding-left:42px; color:var(--body); font-size:16px; line-height:1.65; max-width:34ch; }
-    .feature:hover .feature-head h3 { color:var(--title-hover); }
-    .feature:hover .feature-head svg { color:#d7d7d7; transform:scale(1.06); }
+    .feature-head svg { width:26px; height:26px; color:#a0a0a0; flex-shrink:0; transition:0.3s; }
+    .feature-head h3 { margin:0; font-size:clamp(24px,2.6vw,34px); font-weight:700; color:#e0e0e0; }
+    .feature p { margin:0; padding-left:42px; color:#b0b0b0; font-size:16px; line-height:1.65; }
+    .feature:hover { background: rgba(255,255,255,0.05); }
+    .feature:hover .feature-head svg { color:#fff; transform:scale(1.1); }
+    [data-theme="light"] .feature { background: rgba(255,255,255,0.2); border-bottom-color: rgba(0,0,0,0.05); }
+    [data-theme="light"] .feature:hover { background: rgba(255,255,255,0.4); }
+    [data-theme="light"] .feature-head h3 { color:#222; }
+    [data-theme="light"] .feature p { color:#555; }
 
     /* FAQ */
     .faq-section { position:relative; z-index:2; max-width:800px; margin:80px auto; padding:0 20px; }
-    .faq-section h2 { font-size:2rem; background:linear-gradient(135deg,#fff,#aaa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; text-align:center; margin-bottom:40px; }
-    .faq-item { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:16px; margin-bottom:16px; overflow:hidden; transition:border-color 0.3s; }
-    .faq-question { width:100%; padding:20px; display:flex; justify-content:space-between; align-items:center; background:none; border:none; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; text-align:left; }
-    .faq-question:hover { background:rgba(255,255,255,0.03); }
-    .faq-question svg { transition:transform 0.3s; }
-    .faq-answer { padding:0 20px 20px; color:#b0b0b0; display:none; font-size:0.95rem; line-height:1.6; }
+    .faq-section h2 { font-size:2rem; background:linear-gradient(135deg,#fff,#aaa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; margin-bottom:40px; }
+    .faq-item {
+      backdrop-filter: blur(12px); background: rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.06); border-radius:16px; margin-bottom:16px;
+      overflow:hidden; transition:0.3s;
+    }
+    .faq-item:hover { border-color: rgba(255,255,255,0.15); }
+    .faq-question {
+      width:100%; padding:20px; display:flex; justify-content:space-between; align-items:center;
+      background:none; border:none; color:#fff; font-size:1rem; font-weight:600; cursor:pointer;
+      backdrop-filter: blur(4px);
+    }
+    .faq-question:hover { background: rgba(255,255,255,0.05); }
+    .faq-question svg { transition:0.3s; }
+    .faq-answer { padding:0 20px 20px; color:#b0b0b0; display:none; font-size:0.95rem; }
     .faq-item.open .faq-question svg { transform:rotate(180deg); }
     .faq-item.open .faq-answer { display:block; }
-
-    /* Audio player */
-    .audio-section { position:relative; z-index:2; display:flex; justify-content:center; padding:60px 20px; }
-    .audio-demo { width:100%; max-width:350px; background:rgba(20,20,20,0.6); backdrop-filter:blur(8px); border:1px solid rgba(192,192,192,0.15); border-radius:1.5rem; padding:1rem; color:#e0e0e0; box-shadow:0 10px 25px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:0.5rem; }
-    .audio-demo .track-row { display:flex; justify-content:space-between; align-items:center; }
-    .audio-demo .track-name { font-weight:600; color:#fff; }
-    .progress-bar { height:4px; background:#333; border-radius:2px; overflow:hidden; cursor:pointer; }
-    .progress-fill { width:0%; height:100%; background:linear-gradient(to right, #c0c0c0, #e0e0e0); }
-    .audio-controls { display:flex; justify-content:space-between; align-items:center; }
-    .play-btn { width:2.2rem; height:2.2rem; border-radius:50%; background:rgba(255,255,255,0.1); color:#c0c0c0; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:0.2s; border:none; }
-    .play-btn:hover { background:rgba(255,255,255,0.2); color:#fff; }
-    .dock-btn { background:none; border:none; color:#c0c0c0; cursor:pointer; }
-
-    /* Footer */
-    .footer { text-align:center; padding:40px; border-top:1px solid rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); font-size:0.8rem; position:relative; z-index:2; }
-    .footer a { color:rgba(255,255,255,0.4); text-decoration:none; }
-
-    /* Light mode overrides */
-    [data-theme="light"] body { background:#f7f7f7; }
-    [data-theme="light"] .topbar { background:rgba(255,255,255,0.85); border-bottom-color:rgba(0,0,0,0.1); }
-    [data-theme="light"] .topbar .logo span { background:linear-gradient(135deg,#333,#555); -webkit-background-clip:text; background-clip:text; }
-    [data-theme="light"] .topbar nav a { color:#555; }
-    [data-theme="light"] .topbar nav a:hover { color:#000; }
-    [data-theme="light"] .hero h1 { background:linear-gradient(135deg,#222,#666,#999,#666); background-size:300% 300%; }
-    [data-theme="light"] .hero .subtitle { color:rgba(0,0,0,0.5); }
-    [data-theme="light"] .stat-card { background:linear-gradient(160deg,#fff,#f0f0f0); border-color:rgba(0,0,0,0.08); }
-    [data-theme="light"] .stat-value { color:#222; }
-    [data-theme="light"] .stat-label { color:#555; }
-    [data-theme="light"] .stat-icon { opacity:0.7; color:#777; }
-    [data-theme="light"] .bento-card { background:rgba(0,0,0,0.02); border-color:rgba(0,0,0,0.08); }
-    [data-theme="light"] .bento-card h3 { color:#222; }
-    [data-theme="light"] .bento-card p { color:#555; }
-    [data-theme="light"] .bento-card button { background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.1); color:#333; }
-    [data-theme="light"] .bento-card button:hover { background:rgba(0,0,0,0.1); }
-    [data-theme="light"] .feature-grid-section { --bg:transparent; --line:rgba(0,0,0,0.08); --num:#999; --icon:#777; --title:#222; --body:#555; --title-hover:#000; }
-    [data-theme="light"] .faq-item { background:rgba(0,0,0,0.02); border-color:rgba(0,0,0,0.08); }
+    [data-theme="light"] .faq-item { background: rgba(255,255,255,0.3); border-color: rgba(0,0,0,0.08); }
     [data-theme="light"] .faq-question { color:#222; }
     [data-theme="light"] .faq-answer { color:#555; }
-    [data-theme="light"] .audio-demo { background:rgba(255,255,255,0.8); border-color:rgba(0,0,0,0.1); color:#333; }
-    [data-theme="light"] .audio-demo .track-name { color:#000; }
-    [data-theme="light"] .progress-bar { background:#ddd; }
-    [data-theme="light"] .progress-fill { background:linear-gradient(to right, #888, #aaa); }
-    [data-theme="light"] .play-btn { background:rgba(0,0,0,0.05); color:#555; }
-    [data-theme="light"] .play-btn:hover { background:rgba(0,0,0,0.1); color:#000; }
-    [data-theme="light"] .footer { border-top-color:rgba(0,0,0,0.1); color:rgba(0,0,0,0.3); }
-    [data-theme="light"] .footer a { color:rgba(0,0,0,0.5); }
-    [data-theme="light"] .liquid-btn-outline { color:#333; border-color:#888; }
-    [data-theme="light"] .liquid-btn-outline:hover { background:rgba(0,0,0,0.05); }
 
+    /* Audio Player */
+    .audio-section { position:relative; z-index:2; display:flex; justify-content:center; padding:60px 20px; }
+    .audio-demo {
+      backdrop-filter: blur(20px); background: rgba(0,0,0,0.3);
+      border:1px solid rgba(255,255,255,0.15); border-radius:1.5rem; padding:1rem;
+      color:#e0e0e0; box-shadow:0 20px 40px rgba(0,0,0,0.6);
+      display:flex; flex-direction:column; gap:0.5rem; width:100%; max-width:350px;
+    }
+    .track-name { font-weight:600; color:#fff; }
+    .progress-bar { height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; cursor:pointer; }
+    .progress-fill { width:0%; height:100%; background:linear-gradient(to right, #c0c0c0, #fff); }
+    .audio-controls { display:flex; justify-content:space-between; align-items:center; }
+    .play-btn {
+      width:2.2rem; height:2.2rem; border-radius:50%;
+      background:rgba(255,255,255,0.1); color:#c0c0c0;
+      display:flex; align-items:center; justify-content:center; cursor:pointer; border:none;
+      backdrop-filter: blur(8px); transition:0.2s;
+    }
+    .play-btn:hover { background:rgba(255,255,255,0.25); color:#fff; }
+    [data-theme="light"] .audio-demo { background: rgba(255,255,255,0.4); border-color: rgba(0,0,0,0.1); color:#333; }
+    [data-theme="light"] .track-name { color:#000; }
+    [data-theme="light"] .progress-bar { background: rgba(0,0,0,0.1); }
+    [data-theme="light"] .progress-fill { background: linear-gradient(to right, #666, #999); }
+
+    /* Footer */
+    .footer {
+      text-align:center; padding:40px; border-top:1px solid rgba(255,255,255,0.05);
+      color:rgba(255,255,255,0.2); font-size:0.8rem; position:relative; z-index:2;
+      backdrop-filter: blur(8px); background: rgba(0,0,0,0.2);
+    }
+    .footer a { color:rgba(255,255,255,0.4); text-decoration:none; }
+    [data-theme="light"] .footer { background: rgba(255,255,255,0.2); color:rgba(0,0,0,0.5); }
+    [data-theme="light"] .footer a { color:rgba(0,0,0,0.6); }
+
+    /* Responsive */
     @media(max-width:900px){ .stats-row{ grid-template-columns:repeat(2,1fr); } }
     @media(max-width:520px){ .stats-row{ grid-template-columns:1fr; } .stat-icon{ width:120px; height:120px; } }
     @media(max-width:720px){ .feature-grid{ grid-template-columns:1fr; } .feature:nth-child(odd), .feature:nth-child(even){ padding:36px 0; } }
+
+    /* Additional shiny effects */
+    .glow-border {
+      position: relative;
+    }
+    .glow-border::after {
+      content: ''; position: absolute; inset: -2px; border-radius: inherit;
+      background: linear-gradient(45deg, #ffffff40, #80808040, #ffffff40);
+      z-index: -1; filter: blur(8px); opacity: 0; transition: opacity 0.3s;
+    }
+    .stat-card:hover .glow-border::after,
+    .bento-card:hover .glow-border::after {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Fullscreen GIF background -->
   <div id="bg-gif"></div>
 
   <!-- Topbar -->
   <header class="topbar">
     <div class="logo">
-      <svg viewBox="0 0 70 70" fill="none">
-        <circle cx="35" cy="35" r="34" stroke="url(#grad)" stroke-width="2"/>
-        <path d="M20 25h30v20H20z" fill="none" stroke="url(#grad)" stroke-width="2"/>
-        <path d="M25 30l10 10-10 10" stroke="url(#grad)" stroke-width="2" fill="none"/>
-        <defs><linearGradient id="grad" x1="0" y1="0" x2="70" y2="70"><stop stop-color="#fff"/><stop offset="1" stop-color="#808080"/></linearGradient></defs>
-      </svg>
+      <img src="Chromed.png" alt="Chromed">
       <span>Chromed</span>
     </div>
     <nav>
@@ -255,34 +389,34 @@
     </nav>
   </header>
 
-  <!-- Hero with Stat Cards -->
+  <!-- Hero -->
   <section class="hero">
     <h1>Chromed</h1>
     <p class="subtitle">Your Discord selfbot. Automate, customize, have funsies.</p>
     <div class="stats-section">
       <div class="stats-row">
-        <div class="stat-card">
+        <div class="stat-card glow-border">
           <div class="stat-value" data-target="50" data-decimals="0" data-suffix="+">0+</div>
           <div class="stat-label">Commands</div>
           <svg class="stat-icon" viewBox="0 0 150 150" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
             <rect x="30" y="20" width="90" height="100" rx="16"/><path d="M55 55 L75 72 L55 90"/><path d="M80 92 L100 92"/>
           </svg>
         </div>
-        <div class="stat-card">
+        <div class="stat-card glow-border">
           <div class="stat-value" data-target="1200" data-decimals="0" data-suffix="+">0+</div>
           <div class="stat-label">Active Users</div>
           <svg class="stat-icon" viewBox="0 0 150 150" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(12deg); right:-18px; bottom:-22px;">
             <circle cx="55" cy="65" r="20"/><path d="M30 120 C30 90, 85 90, 85 120"/>
           </svg>
         </div>
-        <div class="stat-card">
+        <div class="stat-card glow-border">
           <div class="stat-value" data-target="99.9" data-decimals="1" data-suffix="%">0%</div>
           <div class="stat-label">Uptime</div>
           <svg class="stat-icon" viewBox="0 0 150 150" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 120 L45 120 L62 60 L80 130 L98 90 L130 90"/>
           </svg>
         </div>
-        <div class="stat-card">
+        <div class="stat-card glow-border">
           <div class="stat-value" data-target="14" data-decimals="0" data-suffix="d">0d</div>
           <div class="stat-label">Free Trial</div>
           <svg class="stat-icon" viewBox="0 0 150 150" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(-8deg); right:-16px; bottom:-30px;">
@@ -307,8 +441,7 @@
   <section class="features-section">
     <h2>What Chromed Can Do</h2>
     <div class="bento-grid">
-      <!-- Message Automation -->
-      <div class="bento-card">
+      <div class="bento-card glow-border">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <h3>Message Automation</h3>
         <p>Send timed messages, auto-reply with custom rules, and spam memes responsibly.</p>
@@ -317,23 +450,20 @@
           <div class="font-demo-text" style="margin-top:8px;">Output appears here</div>
         </div>
       </div>
-      <!-- Status Customizer -->
-      <div class="bento-card">
+      <div class="bento-card glow-border">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
         <h3>Status Changer</h3>
         <p>Rotate custom statuses, show Spotify listens, or set any game activity.</p>
         <button onclick="this.textContent = '🎮 Playing Chromed'">Set Status</button>
       </div>
-      <!-- Reaction Spam -->
-      <div class="bento-card">
+      <div class="bento-card glow-border">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg>
         <h3>Reaction Spam</h3>
         <p>Add a burst of emoji reactions on any message — perfect for memes.</p>
         <button onclick="this.nextElementSibling.textContent = '😂🔥💯'">Spam Reactions</button>
         <div class="font-demo-text" style="margin-top:8px;">-</div>
       </div>
-      <!-- Discord Nitro Perks -->
-      <div class="bento-card">
+      <div class="bento-card glow-border">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <h3>Nitro Simulator</h3>
         <p>Unlock animated avatars, profile effects, and emoji anywhere (client-side).</p>
@@ -343,14 +473,12 @@
           <span style="color:#c0c0c0;font-weight:600;">Nitro Booster</span>
         </div>
       </div>
-      <!-- Friend List Manager -->
-      <div class="bento-card">
+      <div class="bento-card glow-border">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <h3>Friend Manager</h3>
         <p>Mass add/remove friends, sort them, or export your friend list as JSON.</p>
       </div>
-      <!-- Cross Platform -->
-      <div class="bento-card">
+      <div class="bento-card glow-border">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         <h3>Runs Anywhere</h3>
         <p>Use as a browser script, Node.js app, or even on your phone via Termux.</p>
@@ -364,62 +492,50 @@
       <article class="feature">
         <span class="feature-num">01</span>
         <div class="feature-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           <h3>Command Studio</h3>
         </div>
-        <p>Browse, install, or create your own commands with an intuitive editor. No coding required.</p>
+        <p>Browse, install, or create your own commands with an intuitive editor.</p>
       </article>
       <article class="feature">
         <span class="feature-num">02</span>
         <div class="feature-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
           <h3>Music Anywhere</h3>
         </div>
-        <p>Play Spotify or local tracks and display your current listen as a custom Discord status.</p>
+        <p>Play Spotify or local tracks and display as your Discord status.</p>
       </article>
       <article class="feature">
         <span class="feature-num">03</span>
         <div class="feature-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           <h3>Activity Sync</h3>
         </div>
-        <p>Automatically sync what you’re doing (VS Code, YouTube, etc.) to your Discord presence.</p>
+        <p>Sync what you're doing to your Discord presence automatically.</p>
       </article>
       <article class="feature">
         <span class="feature-num">04</span>
         <div class="feature-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           <h3>Privacy First</h3>
         </div>
-        <p>Your token stays on your machine. Chromed never phones home. Fully open-source.</p>
+        <p>Your token never leaves your machine. Fully open-source.</p>
       </article>
       <article class="feature">
         <span class="feature-num">05</span>
         <div class="feature-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           <h3>Plugin Ecosystem</h3>
         </div>
-        <p>Extend functionality with JavaScript plugins. Community-driven and easy to share.</p>
+        <p>Extend with JavaScript plugins. Community-driven and easy to share.</p>
       </article>
       <article class="feature">
         <span class="feature-num">06</span>
         <div class="feature-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           <h3>Dashboard Control</h3>
         </div>
-        <p>Manage everything from a sleek web dashboard: commands, plugins, logs, and settings.</p>
+        <p>Manage everything from a sleek web dashboard: commands, plugins, logs.</p>
       </article>
     </div>
   </section>
@@ -429,23 +545,23 @@
     <h2>Frequently Asked Questions</h2>
     <div class="faq-item">
       <button class="faq-question">What is Chromed? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="faq-answer">Chromed is a selfbot for Discord that lets you automate messages, customize your status, simulate Nitro features, and more — all for personal fun. It runs on your own machine using your own token.</div>
+      <div class="faq-answer">Chromed is a selfbot for Discord that lets you automate messages, customize your status, simulate Nitro features, and more — all for personal fun.</div>
     </div>
     <div class="faq-item">
       <button class="faq-question">Is this allowed by Discord? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="faq-answer">Selfbots violate Discord's Terms of Service. Chromed is for educational purposes and personal use only. Use at your own risk — we're not responsible for any account actions.</div>
+      <div class="faq-answer">Selfbots violate Discord's Terms of Service. Use at your own risk. Educational purposes only.</div>
     </div>
     <div class="faq-item">
       <button class="faq-question">How do I get started? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="faq-answer">Grab your Discord token, run the backend, open the dashboard at /app, and log in. Full setup guide in the docs.</div>
+      <div class="faq-answer">Grab your token, run the backend, open the dashboard at /app, and log in.</div>
     </div>
     <div class="faq-item">
       <button class="faq-question">Can I share my token? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="faq-answer">Never share your token with anyone. Chromed stores it only locally on your backend — it never leaves your machine.</div>
+      <div class="faq-answer">Never share your token. Chromed stores it only locally on your backend.</div>
     </div>
   </section>
 
-  <!-- Audio Player (showcase) -->
+  <!-- Audio Player -->
   <section class="audio-section">
     <div class="audio-demo">
       <div class="track-row">
@@ -462,18 +578,15 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer class="footer">
     Chromed &copy; 2026 — <a href="#">GitHub</a> · <a href="#">Twitter</a> · <a href="#">Discord</a>
   </footer>
 
   <script>
-    // ---- Theme Toggle ----
     const html = document.documentElement;
     const toggleBtn = document.getElementById('themeToggle');
     const savedTheme = localStorage.getItem('theme') || 'dark';
     html.setAttribute('data-theme', savedTheme);
-
     toggleBtn.addEventListener('click', () => {
       const current = html.getAttribute('data-theme');
       const newTheme = current === 'dark' ? 'light' : 'dark';
@@ -481,118 +594,81 @@
       localStorage.setItem('theme', newTheme);
     });
 
-    // ---- Stat count-up animation ----
-    (function(){
-      const values = document.querySelectorAll('.stat-value');
-      function render(el, current) {
-        const prefix = el.dataset.prefix || '';
-        const suffix = el.dataset.suffix || '';
-        const decimals = parseInt(el.dataset.decimals, 10) || 0;
-        el.textContent = prefix + current.toFixed(decimals) + suffix;
+    // Stats animation
+    const values = document.querySelectorAll('.stat-value');
+    function render(el, current) {
+      const prefix = el.dataset.prefix || '', suffix = el.dataset.suffix || '',
+        decimals = parseInt(el.dataset.decimals,10)||0;
+      el.textContent = prefix + current.toFixed(decimals) + suffix;
+    }
+    function animate(el) {
+      const target = parseFloat(el.dataset.target);
+      if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) { render(el,target); return; }
+      let start = null; const duration = 1100;
+      function step(ts) {
+        if (!start) start = ts;
+        const progress = Math.min((ts-start)/duration,1);
+        const eased = 1 - Math.pow(1-progress,3);
+        render(el, target*eased);
+        if (progress<1) requestAnimationFrame(step);
+        else render(el,target);
       }
-      function animate(el) {
-        const target = parseFloat(el.dataset.target);
-        if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
-          render(el, target); return;
-        }
-        let start = null;
-        const duration = 1100;
-        function step(timestamp) {
-          if (!start) start = timestamp;
-          const progress = Math.min((timestamp - start) / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          render(el, target * eased);
-          if (progress < 1) requestAnimationFrame(step);
-          else render(el, target);
-        }
-        requestAnimationFrame(step);
-      }
-      if (!('IntersectionObserver' in window)) {
-        values.forEach(el => render(el, parseFloat(el.dataset.target)));
-        return;
-      }
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            animate(entry.target);
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.4 });
-      values.forEach(el => observer.observe(el));
-    })();
+      requestAnimationFrame(step);
+    }
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { animate(e.target); obs.unobserve(e.target); } });
+      }, { threshold:0.4 });
+      values.forEach(el => obs.observe(el));
+    } else { values.forEach(el => render(el, parseFloat(el.dataset.target))); }
 
-    // ---- Feature grid scroll-reveal ----
-    (function(){
-      const features = document.querySelectorAll('.feature');
-      if (!('IntersectionObserver' in window)) {
-        features.forEach(f => f.classList.add('is-visible'));
-        return;
-      }
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, i) => {
-          if (entry.isIntersecting) {
-            setTimeout(() => {
-              entry.target.classList.add('is-visible');
-            }, i * 40);
-            observer.unobserve(entry.target);
-          }
+    // Feature reveal
+    const features = document.querySelectorAll('.feature');
+    if ('IntersectionObserver' in window) {
+      const fObs = new IntersectionObserver((entries) => {
+        entries.forEach((entry,i) => {
+          if (entry.isIntersecting) { setTimeout(()=>entry.target.classList.add('is-visible'), i*40); fObs.unobserve(entry.target); }
         });
-      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-      features.forEach(f => observer.observe(f));
-    })();
+      }, { threshold:0.15 });
+      features.forEach(f => fObs.observe(f));
+    } else features.forEach(f => f.classList.add('is-visible'));
 
-    // ---- 3D tilt on stat cards and bento cards ----
+    // 3D tilt
     document.querySelectorAll('.stat-card, .bento-card').forEach(card => {
       card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const rotateY = ((x - rect.width/2) / (rect.width/2)) * 5;
-        const rotateX = ((y - rect.height/2) / (rect.height/2)) * -5;
-        card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+        const rect = card.getBoundingClientRect(), x = e.clientX-rect.left, y = e.clientY-rect.top;
+        const rY = ((x-rect.width/2)/(rect.width/2))*5, rX = ((y-rect.height/2)/(rect.height/2))*-5;
+        card.style.transform = `perspective(800px) rotateX(${rX}deg) rotateY(${rY}deg) translateZ(10px)`;
       });
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
-      });
+      card.addEventListener('mouseleave', () => card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateZ(0)');
     });
 
-    // ---- Audio player ----
+    // Audio
     const audio = document.getElementById('audioPlayer');
     const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
     const progressFill = document.getElementById('progressFill');
     const progressBarContainer = document.getElementById('progressBarContainer');
-    function togglePlay() {
-      if (audio.paused) audio.play().catch(()=>{});
-      else audio.pause();
-    }
-    function updatePlayIcon() {
-      playIcon.innerHTML = audio.paused ? '<path d="M6 4l15 8-15 8z"/>' : '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
-    }
-    audio.addEventListener('play', updatePlayIcon);
-    audio.addEventListener('pause', updatePlayIcon);
-    audio.addEventListener('timeupdate', () => {
-      if (audio.duration) progressFill.style.width = (audio.currentTime / audio.duration) * 100 + '%';
+    function togglePlay() { if (audio.paused) audio.play().catch(()=>{}); else audio.pause(); }
+    function updatePlayIcon() { playIcon.innerHTML = audio.paused ? '<path d="M6 4l15 8-15 8z"/>' : '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>'; }
+    audio.addEventListener('play',updatePlayIcon);
+    audio.addEventListener('pause',updatePlayIcon);
+    audio.addEventListener('timeupdate',() => { if (audio.duration) progressFill.style.width = (audio.currentTime/audio.duration)*100+'%'; });
+    audio.addEventListener('ended',() => { audio.currentTime=0; updatePlayIcon(); });
+    progressBarContainer.addEventListener('click',(e) => {
+      const rect = progressBarContainer.getBoundingClientRect(), x = e.clientX-rect.left;
+      if (audio.duration) audio.currentTime = (x/rect.width)*audio.duration;
     });
-    audio.addEventListener('ended', () => { audio.currentTime = 0; updatePlayIcon(); });
-    progressBarContainer.addEventListener('click', (e) => {
-      const rect = progressBarContainer.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      if (audio.duration) audio.currentTime = (x / rect.width) * audio.duration;
-    });
-    playBtn.addEventListener('click', togglePlay);
-    document.getElementById('prevBtn').addEventListener('click', () => { audio.currentTime = 0; });
-    document.getElementById('nextBtn').addEventListener('click', () => { audio.currentTime = 0; });
+    playBtn.addEventListener('click',togglePlay);
+    document.getElementById('prevBtn').addEventListener('click',()=>audio.currentTime=0);
+    document.getElementById('nextBtn').addEventListener('click',()=>audio.currentTime=0);
 
-    // ---- FAQ accordion ----
+    // FAQ
     document.querySelectorAll('.faq-question').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click',() => {
         const item = btn.parentElement;
         item.classList.toggle('open');
-        document.querySelectorAll('.faq-item').forEach(other => {
-          if (other !== item) other.classList.remove('open');
-        });
+        document.querySelectorAll('.faq-item').forEach(o => { if (o!==item) o.classList.remove('open'); });
       });
     });
   </script>
