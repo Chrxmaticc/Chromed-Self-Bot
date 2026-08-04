@@ -5,7 +5,14 @@ export default async function handler(req, res) {
   if (!token) return res.status(400).json({ error: 'Token missing' });
   token = token.replace(/^["']|["']$/g, '').trim();
 
-  const superProps = Buffer.from(JSON.stringify({
+  // ===== STEAL CLIENT'S REAL IP AND USER-AGENT TO BYPASS AUTOMATIONS & BLOCKS =====
+  const clientIP = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
+                   req.headers['x-real-ip'] || 
+                   req.connection?.remoteAddress;
+  const clientUA = req.headers['user-agent'] || '';
+
+  // Build Discord-compatible headers
+  const superProperties = Buffer.from(JSON.stringify({
     os: 'Windows',
     browser: 'Discord Client',
     release_channel: 'stable',
@@ -17,24 +24,29 @@ export default async function handler(req, res) {
     client_event_source: null
   })).toString('base64');
 
-  const headers = {
+  const discordHeaders = {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9013 Chrome/108.0.5359.215 Electron/22.3.18 Safari/537.36',
-    'X-Super-Properties': superProps,
+    'User-Agent': clientUA || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9013 Chrome/108.0.5359.215 Electron/22.3.18 Safari/537.36',
+    'X-Super-Properties': superProperties,
     'X-Discord-Locale': 'en-US',
     'X-Debug-Options': 'bugReporterEnabled',
-    'Referer': 'https://discord.com/channels/@me',
-    'Origin': 'https://discord.com',
+    // Spoof client's IP
+    'X-Forwarded-For': clientIP,
+    'X-Real-IP': clientIP,
   };
 
   try {
-    const response = await fetch('https://discord.com/api/v9/users/@me', { headers });
+    const response = await fetch('https://discord.com/api/v9/users/@me', {
+      headers: discordHeaders
+    });
     const data = await response.json();
+
     if (!response.ok) {
       console.log('Discord response:', data);
       return res.status(401).json({ error: data.message || 'Invalid token' });
     }
+
     return res.json({ success: true, user: data });
   } catch (err) {
     return res.status(500).json({ error: err.message });
