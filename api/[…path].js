@@ -1,6 +1,11 @@
 export default async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = url.pathname; // e.g., "/api/login"
+  let pathname = url.pathname; // e.g., "/api/login" or "/api/login/"
+
+  // Remove trailing slash for consistent matching
+  if (pathname.endsWith('/') && pathname.length > 1) {
+    pathname = pathname.slice(0, -1);
+  }
 
   const { method, body, headers } = req;
   const token = headers.authorization?.replace('Bearer ', '') || body?.token;
@@ -45,7 +50,7 @@ export default async function handler(req, res) {
       return res.json({ success: true });
     }
 
-    // ----- Unknown -----
+    // ----- Unknown endpoint -----
     res.status(404).json({ error: `Unknown endpoint: ${pathname}` });
   } catch (err) {
     res.status(500).json({ error: err.message });
