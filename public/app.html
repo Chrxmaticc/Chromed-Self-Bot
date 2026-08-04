@@ -676,25 +676,27 @@
       addLog(`Prefix changed to "${prefix}"`);
     };
 
-    window.connectToken = async function() {
-      const token = document.getElementById('tokenInput').value.trim();
-      if (!token) return alert('Token required');
-      try {
-        const res = await fetch(`${API_BASE}/login`, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ token })
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        userToken = token;
-        localStorage.setItem('chromed_token', token);
-        updateAuthUI(data.user);
-        addLog('Connected successfully');
-      } catch(e) {
-        alert('Invalid token: ' + e.message);
-      }
-    };
+window.connectToken = async function() {
+  const token = document.getElementById('tokenInput').value.trim();
+  if (!token) return alert('Token required');
+
+  try {
+    // Call Discord directly – no backend
+    const res = await fetch('https://discord.com/api/v9/users/@me', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    if (!data.id) throw new Error(data.message || 'Invalid token');
+
+    userToken = token;
+    localStorage.setItem('chromed_token', token);
+    updateAuthUI(data);
+    addLog('Connected successfully');
+  } catch (e) {
+    alert('Invalid token: ' + e.message);
+  }
+};
 
     window.changeToken = async function() {
       const newToken = document.getElementById('newTokenInput').value.trim();
