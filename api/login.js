@@ -1,36 +1,44 @@
+// api/login.js
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
-  const raw = req.body.token;
-  const token = raw ? raw.replace(/^["']|["']$/g, '').trim() : '';
+  let token = req.body.token;
+  if (!token) return res.status(400).json({ error: 'Token missing' });
+  token = token.replace(/^["']|["']$/g, '').trim();
 
-  // Build debug info
-  const debug = {
-    receivedLength: raw ? raw.length : 0,
-    cleanedLength: token.length,
-    firstChars: token.slice(0, 15) + (token.length > 15 ? '...' : ''),
-    firstCharCode: token.charCodeAt(0) || null,
-    hasBearer: token.startsWith('Bearer '),
+  // Mimic a real Discord client
+  const superProperties = Buffer.from(JSON.stringify({
+    os: 'Windows',
+    browser: 'Discord Client',
+    release_channel: 'stable',
+    client_version: '1.0.9013',
+    os_version: '10.0.19045',
+    os_arch: 'x64',
+    system_locale: 'en-US',
+    client_build_number: 234123,
+    client_event_source: null
+  })).toString('base64');
+
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9013 Chrome/108.0.5359.215 Electron/22.3.18 Safari/537.36',
+    'X-Super-Properties': superProperties,
+    'X-Discord-Locale': 'en-US',
+    'X-Debug-Options': 'bugReporterEnabled',
   };
 
-  if (!token) {
-    return res.status(400).json({ error: 'Token missing', debug });
-  }
-
   try {
-    const response = await fetch('https://discord.com/api/v9/users/@me', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await fetch('https://discord.com/api/v9/users/@me', { headers });
     const data = await response.json();
-    debug.discordStatus = response.status;
-    debug.discordBody = data;
 
     if (!response.ok) {
-      return res.status(401).json({ error: data.message || 'Invalid token', debug });
+      console.log('Discord rejected:', data);
+      return res.status(401).json({ error: data.message || 'Invalid token' });
     }
 
-    return res.json({ success: true, user: data, debug });
+    return res.json({ success: true, user: data });
   } catch (err) {
-    return res.status(500).json({ error: err.message, debug });
+    return res.status(500).json({ error: err.message });
   }
 }
