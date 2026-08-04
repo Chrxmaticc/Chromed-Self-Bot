@@ -7,16 +7,33 @@
   <link rel="icon" type="image/png" href="Chromed.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* ===== GLOBAL RESET & VARIABLES ===== */
+    /* Reuse the same glass variables and background as index.html */
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: #0a0a0a;
+      background: #000;
       color: #fff;
       display: flex;
       height: 100vh;
       overflow: hidden;
+      position: relative;
     }
+
+    #bg-gif-dark, #bg-gif-light {
+      position: fixed; top:0; left:0; width:100vw; height:100vh; z-index:0;
+      background-size: cover; background-position: center; pointer-events: none;
+    }
+    #bg-gif-dark { background-image: url('Chromed.gif'); }
+    #bg-gif-light { background-image: url('Chromed-White.gif'); }
+    [data-theme="light"] #bg-gif-dark { display: none; }
+    [data-theme="dark"] #bg-gif-light { display: none; }
+    .bg-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%; z-index:1;
+      background: rgba(0,0,0,0.25);
+      pointer-events: none;
+    }
+    [data-theme="light"] .bg-overlay { background: rgba(255,255,255,0.35); }
+
     :root {
       --glass-bg: rgba(255,255,255,0.04);
       --glass-border: rgba(255,255,255,0.08);
@@ -38,7 +55,6 @@
       --shadow: 0 8px 32px rgba(0,0,0,0.15);
     }
 
-    /* ===== SIDEBAR ===== */
     .sidebar {
       width: 260px;
       background: rgba(0,0,0,0.35);
@@ -58,17 +74,8 @@
       font-weight: 800;
       font-size: 1.2rem;
     }
-    .sidebar-logo img {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-    }
-    .sidebar nav {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .sidebar-logo img { width: 36px; height: 36px; border-radius: 8px; }
+    .sidebar nav { flex:1; display:flex; flex-direction:column; gap:4px; }
     .sidebar nav a {
       display: flex;
       align-items: center;
@@ -78,7 +85,7 @@
       text-decoration: none;
       font-weight: 500;
       font-size: 0.95rem;
-      transition: all 0.2s;
+      transition: 0.2s;
       border-radius: 0;
     }
     .sidebar nav a:hover,
@@ -86,6 +93,7 @@
       background: var(--glass-hover-bg);
       color: var(--text-primary);
     }
+    .sidebar nav a svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width:1.5; }
     .sidebar-user {
       margin-top: auto;
       padding: 1rem 1.5rem;
@@ -94,31 +102,12 @@
       align-items: center;
       gap: 10px;
     }
-    .sidebar-user img {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-    }
-    .sidebar-user .info {
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar-user .name {
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-    .sidebar-user .status {
-      font-size: 0.75rem;
-      color: #43b581;
-    }
+    .sidebar-user img { width: 36px; height: 36px; border-radius: 50%; }
+    .sidebar-user .info { display: flex; flex-direction: column; }
+    .sidebar-user .name { font-weight: 600; font-size: 0.9rem; }
+    .sidebar-user .status { font-size: 0.75rem; color: #43b581; }
 
-    /* ===== MAIN CONTENT ===== */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
     .topbar {
       display: flex;
       justify-content: space-between;
@@ -126,50 +115,24 @@
       padding: 1rem 2rem;
       background: rgba(0,0,0,0.3);
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--glass-border);
     }
-    .topbar h2 {
-      font-size: 1.3rem;
-      font-weight: 600;
-    }
-    .token-status {
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .topbar h2 { font-size:1.3rem; font-weight:600; }
+    .token-status { font-size:0.85rem; display:flex; align-items:center; gap:8px; }
     .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #43b581;
-      display: inline-block;
+      width:8px; height:8px; border-radius:50%;
+      background: #43b581; display:inline-block;
     }
-    .dot.offline {
-      background: #f04747;
-    }
+    .dot.offline { background: #f04747; }
     .content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 2rem;
+      flex:1; overflow-y:auto; padding:2rem;
       scrollbar-width: thin;
     }
-    .content::-webkit-scrollbar {
-      width: 6px;
-    }
-    .content::-webkit-scrollbar-thumb {
-      background: #333;
-      border-radius: 3px;
-    }
+    .content::-webkit-scrollbar { width:6px; }
+    .content::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
 
-    /* ===== PANELS ===== */
-    .panel {
-      display: none;
-    }
-    .panel.active {
-      display: block;
-    }
+    .panel { display:none; }
+    .panel.active { display:block; }
     .glass-card {
       background: var(--glass-bg);
       backdrop-filter: blur(16px);
@@ -180,30 +143,12 @@
       box-shadow: var(--shadow);
       margin-bottom: 1.5rem;
     }
-    .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--text-primary);
-    }
-    .grid-2col {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-    }
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 800;
-    }
-    .stat-label {
-      color: var(--text-secondary);
-    }
+    .card-title { font-size:1rem; font-weight:600; margin-bottom:1rem; color:var(--text-primary); }
+    .grid-2col { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
+    .stat-item { display:flex; flex-direction:column; }
+    .stat-value { font-size:2rem; font-weight:800; }
+    .stat-label { color:var(--text-secondary); }
 
-    /* Forms */
     input, select, textarea {
       background: rgba(255,255,255,0.06);
       border: 1px solid var(--glass-border);
@@ -213,12 +158,9 @@
       font-family: inherit;
       font-size: 0.9rem;
       outline: none;
-      transition: border 0.2s;
       width: 100%;
     }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
     button {
       background: rgba(255,255,255,0.1);
       border: 1px solid var(--glass-border);
@@ -227,35 +169,16 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: 500;
-      transition: all 0.2s;
+      transition: 0.2s;
       backdrop-filter: blur(8px);
     }
-    button:hover {
-      background: rgba(255,255,255,0.2);
-    }
-    button.primary {
-      background: #5865f2;
-      border-color: #5865f2;
-    }
-    button.danger {
-      background: #ed4245;
-      border-color: #ed4245;
-    }
-    .btn-sm {
-      padding: 0.35rem 0.8rem;
-      font-size: 0.8rem;
-    }
-    .token-input-box {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .token-input-box input {
-      flex: 1;
-      font-family: 'Roboto Mono', monospace;
-    }
+    button:hover { background: rgba(255,255,255,0.2); }
+    button.primary { background: #5865f2; border-color: #5865f2; }
+    button.danger { background: #ed4245; border-color: #ed4245; }
+    .btn-sm { padding:0.35rem 0.8rem; font-size:0.8rem; }
+    .token-input-box { display:flex; gap:0.5rem; margin-bottom:1rem; }
+    .token-input-box input { flex:1; font-family: 'Roboto Mono', monospace; }
 
-    /* Command list */
     .command-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -272,117 +195,68 @@
       gap: 0.5rem;
       transition: 0.2s;
     }
-    .command-item:hover {
-      border-color: var(--accent);
-    }
-    .command-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .command-name {
-      font-family: 'Roboto Mono', monospace;
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: #fff;
-    }
-    .command-desc {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-    }
-    .toggle {
-      position: relative;
-      width: 36px;
-      height: 20px;
-    }
-    .toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .toggle .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #444;
-      border-radius: 20px;
-      transition: 0.2s;
-    }
-    .toggle .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 2px;
-      bottom: 2px;
-      background: white;
-      border-radius: 50%;
-      transition: 0.2s;
-    }
-    .toggle input:checked + .slider {
-      background: #5865f2;
-    }
-    .toggle input:checked + .slider:before {
-      transform: translateX(16px);
-    }
+    .command-item:hover { border-color: var(--accent); }
+    .command-header { display:flex; justify-content:space-between; align-items:center; }
+    .command-name { font-family:'Roboto Mono', monospace; font-weight:600; font-size:0.95rem; color:#fff; }
+    .command-desc { font-size:0.8rem; color:var(--text-secondary); }
+    .toggle { position:relative; width:36px; height:20px; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#444; border-radius:20px; transition:0.2s; }
+    .toggle .slider:before { content:""; position:absolute; height:16px; width:16px; left:2px; bottom:2px; background:white; border-radius:50%; transition:0.2s; }
+    .toggle input:checked + .slider { background: #5865f2; }
+    .toggle input:checked + .slider:before { transform: translateX(16px); }
 
-    /* Auto‑reply list */
-    .reply-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .reply-item input {
-      flex: 1;
-    }
-    .log-line {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.8rem;
-      padding: 0.5rem;
-      border-bottom: 1px solid var(--glass-border);
-    }
+    .reply-item { display:flex; align-items:center; gap:0.5rem; background:var(--card-bg); border-radius:12px; padding:0.75rem; margin-bottom:0.5rem; }
+    .reply-item input { flex:1; }
+    .log-line { font-family:'Roboto Mono', monospace; font-size:0.8rem; padding:0.5rem; border-bottom:1px solid var(--glass-border); }
 
-    /* Responsive sidebar */
-    @media (max-width: 800px) {
-      .sidebar {
-        width: 80px;
-        padding: 1rem 0;
-      }
-      .sidebar nav a span,
-      .sidebar-logo span,
-      .sidebar-user .info {
-        display: none;
-      }
-      .sidebar nav a {
-        justify-content: center;
-        padding: 0.75rem;
-      }
+    @media(max-width:800px) {
+      .sidebar { width:80px; padding:1rem 0; }
+      .sidebar nav a span, .sidebar-logo span, .sidebar-user .info { display:none; }
+      .sidebar nav a { justify-content:center; padding:0.75rem; }
     }
   </style>
 </head>
 <body>
+  <div id="bg-gif-dark"></div>
+  <div id="bg-gif-light"></div>
+  <div class="bg-overlay"></div>
 
-  <!-- ========== SIDEBAR ========== -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <img src="Chromed.png" alt="Chromed">
       <span>Chromed</span>
     </div>
     <nav>
-      <a href="#" data-panel="general" class="active">📊 General</a>
-      <a href="#" data-panel="commands">⚡ Commands</a>
-      <a href="#" data-panel="rpc">🎮 Rich Presence</a>
-      <a href="#" data-panel="device">📱 Device Spoof</a>
-      <a href="#" data-panel="autoreply">💬 Auto-Reply</a>
-      <a href="#" data-panel="logs">📋 Logs</a>
-      <a href="#" data-panel="settings">⚙️ Settings</a>
+      <a href="#" data-panel="general" class="active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>General</span>
+      </a>
+      <a href="#" data-panel="commands">
+        <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span>Commands</span>
+      </a>
+      <a href="#" data-panel="rpc">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
+        <span>Rich Presence</span>
+      </a>
+      <a href="#" data-panel="device">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Device Spoof</span>
+      </a>
+      <a href="#" data-panel="autoreply">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span>Auto-Reply</span>
+      </a>
+      <a href="#" data-panel="logs">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Logs</span>
+      </a>
+      <a href="#" data-panel="settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span>Settings</span>
+      </a>
     </nav>
     <div class="sidebar-user" id="sidebarUser">
       <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="avatar">
@@ -393,7 +267,7 @@
     </div>
   </aside>
 
-  <!-- ========== MAIN ========== -->
+  <!-- MAIN -->
   <div class="main">
     <header class="topbar">
       <h2 id="panelTitle">General</h2>
@@ -413,11 +287,11 @@
             <input type="password" id="tokenInput" placeholder="Paste your user token">
             <button id="connectBtn" class="primary">Connect</button>
           </div>
-          <p style="font-size:0.8rem; color:var(--text-secondary);">Your token stays local and is never stored on any server. It's only used to talk to Discord's API through your own backend.</p>
+          <p style="font-size:0.8rem; color:var(--text-secondary);">Your token stays local and is only sent to your own backend.</p>
         </div>
       </div>
 
-      <!-- DASHBOARD PANELS (hidden until token verified) -->
+      <!-- DASHBOARD PANELS (visible after login) -->
       <div id="dashboardPanels" style="display:none;">
 
         <!-- GENERAL PANEL -->
@@ -448,7 +322,7 @@
               </div>
             </div>
             <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
-              <button id="addCustomCmdBtn">+ Add Custom</button>
+              <button id="addCustomCmdBtn">Add Custom</button>
               <button id="resetCmdsBtn" class="danger">Reset to Default</button>
             </div>
             <div class="command-grid" id="commandList"></div>
@@ -460,61 +334,23 @@
           <div class="glass-card">
             <h2 class="card-title">Rich Presence</h2>
             <div style="display:flex; flex-direction:column; gap:1rem;">
-              <div>
-                <label>Details</label>
-                <input id="rpcDetails" placeholder="Playing Chromed">
-              </div>
-              <div>
-                <label>State</label>
-                <input id="rpcState" placeholder="Discord, customized">
+              <div><label>Details</label><input id="rpcDetails" placeholder="Playing Chromed"></div>
+              <div><label>State</label><input id="rpcState" placeholder="Discord, customized"></div>
+              <div class="grid-2col">
+                <div><label>Large Image Key</label><input id="rpcLargeImg" placeholder="chromed_logo"></div>
+                <div><label>Large Image Text</label><input id="rpcLargeImgText" placeholder="Chromed"></div>
+                <div><label>Small Image Key</label><input id="rpcSmallImg" placeholder="spotify"></div>
+                <div><label>Small Image Text</label><input id="rpcSmallImgText" placeholder="Listening"></div>
               </div>
               <div class="grid-2col">
-                <div>
-                  <label>Large Image Key</label>
-                  <input id="rpcLargeImg" placeholder="chromed_logo">
-                </div>
-                <div>
-                  <label>Large Image Text</label>
-                  <input id="rpcLargeImgText" placeholder="Chromed">
-                </div>
-                <div>
-                  <label>Small Image Key</label>
-                  <input id="rpcSmallImg" placeholder="spotify">
-                </div>
-                <div>
-                  <label>Small Image Text</label>
-                  <input id="rpcSmallImgText" placeholder="Listening">
-                </div>
+                <div><label>Button 1 Label</label><input id="rpcBtn1Label" placeholder="Invite"></div>
+                <div><label>Button 1 URL</label><input id="rpcBtn1Url" placeholder="https://..."></div>
+                <div><label>Button 2 Label</label><input id="rpcBtn2Label" placeholder="Docs"></div>
+                <div><label>Button 2 URL</label><input id="rpcBtn2Url" placeholder="https://..."></div>
               </div>
               <div class="grid-2col">
-                <div>
-                  <label>Button 1 Label</label>
-                  <input id="rpcBtn1Label" placeholder="Invite">
-                </div>
-                <div>
-                  <label>Button 1 URL</label>
-                  <input id="rpcBtn1Url" placeholder="https://discord.gg/...">
-                </div>
-                <div>
-                  <label>Button 2 Label</label>
-                  <input id="rpcBtn2Label" placeholder="Docs">
-                </div>
-                <div>
-                  <label>Button 2 URL</label>
-                  <input id="rpcBtn2Url" placeholder="https://chromed.dev">
-                </div>
-              </div>
-              <div class="grid-2col">
-                <div>
-                  <label>Party Size (current/max)</label>
-                  <input id="rpcPartyCurrent" placeholder="1" style="width:60px; display:inline;">
-                  <span> / </span>
-                  <input id="rpcPartyMax" placeholder="5" style="width:60px; display:inline;">
-                </div>
-                <div>
-                  <label>Start Timestamp (Unix)</label>
-                  <input id="rpcStartTime" placeholder="1680000000">
-                </div>
+                <div><label>Party Size (current/max)</label><input id="rpcPartyCurrent" placeholder="1" style="width:60px; display:inline;"> / <input id="rpcPartyMax" placeholder="5" style="width:60px; display:inline;"></div>
+                <div><label>Start Timestamp</label><input id="rpcStartTime" placeholder="1680000000"></div>
               </div>
               <button id="saveRpcBtn" class="primary">Apply Rich Presence</button>
             </div>
@@ -527,7 +363,7 @@
             <h2 class="card-title">Device Spoof</h2>
             <p style="margin-bottom:1rem;">This gives you a special online status icon (no actual platform change).</p>
             <select id="deviceSelect">
-              <option value="pc">PC (default)</option>
+              <option value="pc">PC</option>
               <option value="web">Web</option>
               <option value="mobile">Mobile</option>
               <option value="ios">iOS</option>
@@ -585,11 +421,10 @@
   </div> <!-- end main -->
 
   <script>
-    // ===== GLOBAL STATE =====
-    const DEFAULT_PREFIX = '!';
+    // ========== GLOBAL STATE ==========
     const API_BASE = '/api';
     let userToken = localStorage.getItem('chromed_token') || null;
-    let prefix = localStorage.getItem('chromed_prefix') || DEFAULT_PREFIX;
+    let prefix = localStorage.getItem('chromed_prefix') || '!';
     let enabledCommands = JSON.parse(localStorage.getItem('chromed_enabledCmds') || '[]');
     let customCommands = JSON.parse(localStorage.getItem('chromed_customCmds') || '[]');
     let autoReplies = JSON.parse(localStorage.getItem('chromed_autoReplies') || '[]');
@@ -597,137 +432,151 @@
     let deviceSpoof = localStorage.getItem('chromed_device') || 'pc';
     let logs = JSON.parse(localStorage.getItem('chromed_logs') || '[]');
 
-    // ---- 100+ pre‑built commands (all lowercase, no emojis) ----
+    // 100+ commands (all lowercase, no emojis)
     const prebuiltCommands = [
-      // utility
-      { name:'ping', category:'utility', desc:'Replies with pong' },
-      { name:'echo', category:'utility', desc:'Repeats your message' },
-      { name:'avatar', category:'utility', desc:'Get user avatar' },
-      { name:'serverinfo', category:'utility', desc:'Shows server info' },
-      { name:'userinfo', category:'utility', desc:'Shows user info' },
-      { name:'calc', category:'utility', desc:'Simple calculator' },
-      { name:'translate', category:'utility', desc:'Translate text' },
-      { name:'qr', category:'utility', desc:'Generate QR code' },
-      { name:'define', category:'utility', desc:'Dictionary definition' },
-      { name:'weather', category:'utility', desc:'Weather for a city' },
-      { name:'timestamp', category:'utility', desc:'Current Unix timestamp' },
-      { name:'color', category:'utility', desc:'Random hex color' },
-      { name:'reminder', category:'utility', desc:'Set a reminder' },
-      { name:'poll', category:'utility', desc:'Create a quick poll' },
-      { name:'choose', category:'utility', desc:'Pick between options' },
-      { name:'purge', category:'utility', desc:'Delete your recent messages' },
-      { name:'send', category:'utility', desc:'Send message to any channel' },
-      { name:'edit', category:'utility', desc:'Edit your message' },
-      { name:'delete', category:'utility', desc:'Delete your message' },
-      { name:'react', category:'utility', desc:'Add reaction to message' },
-      // fun
-      { name:'8ball', category:'fun', desc:'Magic 8-ball' },
-      { name:'roll', category:'fun', desc:'Roll dice' },
-      { name:'coinflip', category:'fun', desc:'Flip a coin' },
-      { name:'reverse', category:'fun', desc:'Reverse text' },
-      { name:'morse', category:'fun', desc:'Text to Morse code' },
-      { name:'tableflip', category:'fun', desc:'(╯°□°）╯︵ ┻━┻' },
-      { name:'unflip', category:'fun', desc:'┬─┬ ノ( ゜-゜ノ)' },
-      { name:'lenny', category:'fun', desc:'( ͡° ͜ʖ ͡°)' },
-      { name:'clap', category:'fun', desc:'👏 Clap 👏 between' },
-      { name:'vaporwave', category:'fun', desc:'Ａｅｓｔｈｅｔｉｃ' },
-      { name:'zalgo', category:'fun', desc:'Cursed text' },
-      { name:'ascii', category:'fun', desc:'Make ASCII art' },
-      { name:'meme', category:'fun', desc:'Random meme' },
-      { name:'joke', category:'fun', desc:'Random joke' },
-      { name:'fact', category:'fun', desc:'Random fact' },
-      { name:'quote', category:'fun', desc:'Inspirational quote' },
-      { name:'rps', category:'fun', desc:'Rock Paper Scissors' },
-      { name:'emojify', category:'fun', desc:'Text to emoji' },
-      { name:'say', category:'fun', desc:'Bot says something' },
-      { name:'randomnumber', category:'fun', desc:'Random number' },
-      // roleplay
-      { name:'slap', category:'roleplay', desc:'Slap a user' },
-      { name:'hug', category:'roleplay', desc:'Hug a user' },
-      { name:'kiss', category:'roleplay', desc:'Kiss a user' },
-      { name:'pat', category:'roleplay', desc:'Pat a user' },
-      { name:'wink', category:'roleplay', desc:'Wink at a user' },
-      { name:'cry', category:'roleplay', desc:'Cry dramatically' },
-      { name:'laugh', category:'roleplay', desc:'Laugh out loud' },
-      { name:'dance', category:'roleplay', desc:'Show off moves' },
-      { name:'shrug', category:'roleplay', desc:'¯\\_(ツ)_/¯' },
-      { name:'poke', category:'roleplay', desc:'Poke a user' },
-      { name:'tickle', category:'roleplay', desc:'Tickle someone' },
-      { name:'bite', category:'roleplay', desc:'Bite someone' },
-      { name:'highfive', category:'roleplay', desc:'High five' },
-      { name:'facepalm', category:'roleplay', desc:'Facepalm' },
-      // images
-      { name:'cat', category:'images', desc:'Random cat picture' },
-      { name:'dog', category:'images', desc:'Random dog picture' },
-      { name:'fox', category:'images', desc:'Random fox picture' },
-      { name:'bird', category:'images', desc:'Random bird picture' },
-      { name:'panda', category:'images', desc:'Random panda picture' },
-      { name:'anime', category:'images', desc:'Random anime image' },
-      { name:'waifu', category:'images', desc:'Random waifu' },
-      { name:'neko', category:'images', desc:'Random neko' },
-      { name:'shibe', category:'images', desc:'Shiba Inu picture' },
-      { name:'capybara', category:'images', desc:'Capybara picture' },
-      // music
-      { name:'lyrics', category:'music', desc:'Get song lyrics' },
-      { name:'play', category:'music', desc:'Play song (Spotify status)' },
-      { name:'stop', category:'music', desc:'Stop music status' },
-      { name:'nowplaying', category:'music', desc:'Show current track' },
-      // customization
-      { name:'setbio', category:'customization', desc:'Change your bio' },
-      { name:'clearbio', category:'customization', desc:'Clear bio' },
-      { name:'setbanner', category:'customization', desc:'Set profile banner' },
-      { name:'setavatar', category:'customization', desc:'Change avatar (client-side)' },
-      { name:'setpronouns', category:'customization', desc:'Set pronouns' },
-      { name:'setaccentcolor', category:'customization', desc:'Accent color' },
-      { name:'sethypesquad', category:'customization', desc:'Set HypeSquad house' },
-      { name:'rpc', category:'customization', desc:'Rich presence commands' },
-      { name:'status', category:'customization', desc:'Online/idle/dnd/invisible' },
-      { name:'statusmessage', category:'customization', desc:'Custom status text' },
-      { name:'device', category:'customization', desc:'Spoof device type' },
-      { name:'theme', category:'customization', desc:'Dark/light/midnight' },
-      { name:'font', category:'customization', desc:'Change font (client-side)' },
-      { name:'fontsize', category:'customization', desc:'Font size' },
-      { name:'nitro', category:'customization', desc:'Nitro simulator' },
-      // moderation
-      { name:'ban', category:'moderation', desc:'Ban a member (needs perms)' },
-      { name:'kick', category:'moderation', desc:'Kick a member' },
-      { name:'mute', category:'moderation', desc:'Server mute a member' },
-      { name:'unmute', category:'moderation', desc:'Unmute' },
-      { name:'nick', category:'moderation', desc:'Change nickname' },
-      { name:'slowmode', category:'moderation', desc:'Set channel slowmode' },
-      { name:'lock', category:'moderation', desc:'Lock channel' },
-      { name:'unlock', category:'moderation', desc:'Unlock channel' },
-      // voice
-      { name:'join', category:'voice', desc:'Join voice channel' },
-      { name:'leave', category:'voice', desc:'Leave voice channel' },
-      { name:'deafen', category:'voice', desc:'Deafen yourself' },
-      { name:'undeafen', category:'voice', desc:'Undeafen' },
-      { name:'mutevoice', category:'voice', desc:'Mute mic' },
-      { name:'unmutevoice', category:'voice', desc:'Unmute mic' },
-      { name:'stream', category:'voice', desc:'Go live' },
-      // friends
-      { name:'friend', category:'friends', desc:'Manage friends' },
-      { name:'block', category:'friends', desc:'Block user' },
-      { name:'unblock', category:'friends', desc:'Unblock user' },
-      { name:'friendlist', category:'friends', desc:'List friends' },
-      { name:'pending', category:'friends', desc:'Pending requests' },
-      // misc
-      { name:'uptime', category:'misc', desc:'Bot uptime' },
-      { name:'invite', category:'misc', desc:'Generate server invite' },
-      { name:'spotify', category:'misc', desc:'Show Spotify status' },
-      { name:'game', category:'misc', desc:'Set game activity' },
-      { name:'streaming', category:'misc', desc:'Set streaming status' },
-      { name:'clearstatus', category:'misc', desc:'Clear all statuses' }
+      // utility (25)
+      {name:'ping', category:'utility', desc:'Replies with pong'},
+      {name:'echo', category:'utility', desc:'Repeats your message'},
+      {name:'avatar', category:'utility', desc:'Get user avatar'},
+      {name:'serverinfo', category:'utility', desc:'Shows server info'},
+      {name:'userinfo', category:'utility', desc:'Shows user info'},
+      {name:'calc', category:'utility', desc:'Simple calculator'},
+      {name:'translate', category:'utility', desc:'Translate text'},
+      {name:'qr', category:'utility', desc:'Generate QR code'},
+      {name:'define', category:'utility', desc:'Dictionary definition'},
+      {name:'weather', category:'utility', desc:'Weather for a city'},
+      {name:'timestamp', category:'utility', desc:'Current Unix timestamp'},
+      {name:'color', category:'utility', desc:'Random hex color'},
+      {name:'reminder', category:'utility', desc:'Set a reminder'},
+      {name:'poll', category:'utility', desc:'Create a quick poll'},
+      {name:'choose', category:'utility', desc:'Pick between options'},
+      {name:'purge', category:'utility', desc:'Delete your recent messages'},
+      {name:'send', category:'utility', desc:'Send message to any channel'},
+      {name:'edit', category:'utility', desc:'Edit your message'},
+      {name:'delete', category:'utility', desc:'Delete your message'},
+      {name:'react', category:'utility', desc:'Add reaction to message'},
+      {name:'quote', category:'utility', desc:'Quote a message'},
+      {name:'strawpoll', category:'utility', desc:'Create a strawpoll'},
+      {name:'embed', category:'utility', desc:'Send a rich embed'},
+      {name:'spoiler', category:'utility', desc:'Mark text as spoiler'},
+      {name:'tts', category:'utility', desc:'Send TTS message'},
+      // fun (30)
+      {name:'8ball', category:'fun', desc:'Magic 8-ball'},
+      {name:'roll', category:'fun', desc:'Roll dice'},
+      {name:'coinflip', category:'fun', desc:'Flip a coin'},
+      {name:'reverse', category:'fun', desc:'Reverse text'},
+      {name:'morse', category:'fun', desc:'Text to Morse code'},
+      {name:'tableflip', category:'fun', desc:'(ノಠ益ಠ)ノ彡┻━┻'},
+      {name:'unflip', category:'fun', desc:'┬─┬ノ( º _ ºノ)'},
+      {name:'lenny', category:'fun', desc:'( ͡° ͜ʖ ͡°)'},
+      {name:'clap', category:'fun', desc:'Clap between words'},
+      {name:'vaporwave', category:'fun', desc:'Ａｅｓｔｈｅｔｉｃ'},
+      {name:'zalgo', category:'fun', desc:'Cursed text'},
+      {name:'ascii', category:'fun', desc:'Make ASCII art'},
+      {name:'meme', category:'fun', desc:'Random meme'},
+      {name:'joke', category:'fun', desc:'Random joke'},
+      {name:'fact', category:'fun', desc:'Random fact'},
+      {name:'rps', category:'fun', desc:'Rock paper scissors'},
+      {name:'emojify', category:'fun', desc:'Text to emoji'},
+      {name:'say', category:'fun', desc:'Bot says something'},
+      {name:'randomnumber', category:'fun', desc:'Random number'},
+      {name:'hack', category:'fun', desc:'Fake hack animation'},
+      {name:'f', category:'fun', desc:'Pay respects'},
+      {name:'mock', category:'fun', desc:'Spongebob mocking text'},
+      {name:'owo', category:'fun', desc:'OwO translator'},
+      {name:'cookie', category:'fun', desc:'Give someone a cookie'},
+      {name:'ship', category:'fun', desc:'Ship two people'},
+      {name:'iq', category:'fun', desc:'Random IQ score'},
+      {name:'gayrate', category:'fun', desc:'How gay are you?'},
+      {name:'simp', category:'fun', desc:'Simp detector'},
+      {name:'chad', category:'fun', desc:'Chad meme'},
+      {name:'sus', category:'fun', desc:'Among us joke'},
+      // roleplay (15)
+      {name:'slap', category:'roleplay', desc:'Slap a user'},
+      {name:'hug', category:'roleplay', desc:'Hug a user'},
+      {name:'kiss', category:'roleplay', desc:'Kiss a user'},
+      {name:'pat', category:'roleplay', desc:'Pat a user'},
+      {name:'wink', category:'roleplay', desc:'Wink at a user'},
+      {name:'cry', category:'roleplay', desc:'Cry dramatically'},
+      {name:'laugh', category:'roleplay', desc:'Laugh out loud'},
+      {name:'dance', category:'roleplay', desc:'Show off moves'},
+      {name:'shrug', category:'roleplay', desc:'¯\\_(ツ)_/¯'},
+      {name:'poke', category:'roleplay', desc:'Poke a user'},
+      {name:'tickle', category:'roleplay', desc:'Tickle someone'},
+      {name:'bite', category:'roleplay', desc:'Bite someone'},
+      {name:'highfive', category:'roleplay', desc:'High five'},
+      {name:'facepalm', category:'roleplay', desc:'Facepalm'},
+      {name:'blush', category:'roleplay', desc:'Blush intensely'},
+      // images (10)
+      {name:'cat', category:'images', desc:'Random cat picture'},
+      {name:'dog', category:'images', desc:'Random dog picture'},
+      {name:'fox', category:'images', desc:'Random fox picture'},
+      {name:'bird', category:'images', desc:'Random bird picture'},
+      {name:'panda', category:'images', desc:'Random panda picture'},
+      {name:'anime', category:'images', desc:'Random anime image'},
+      {name:'waifu', category:'images', desc:'Random waifu'},
+      {name:'neko', category:'images', desc:'Random neko'},
+      {name:'shibe', category:'images', desc:'Shiba Inu picture'},
+      {name:'capybara', category:'images', desc:'Capybara picture'},
+      // music (5)
+      {name:'lyrics', category:'music', desc:'Get song lyrics'},
+      {name:'play', category:'music', desc:'Play song (Spotify status)'},
+      {name:'stop', category:'music', desc:'Stop music status'},
+      {name:'nowplaying', category:'music', desc:'Show current track'},
+      {name:'skip', category:'music', desc:'Skip to next track'},
+      // customization (14)
+      {name:'setbio', category:'customization', desc:'Change your bio'},
+      {name:'clearbio', category:'customization', desc:'Clear bio'},
+      {name:'setbanner', category:'customization', desc:'Set profile banner'},
+      {name:'setavatar', category:'customization', desc:'Change avatar (client-side)'},
+      {name:'setpronouns', category:'customization', desc:'Set pronouns'},
+      {name:'setaccentcolor', category:'customization', desc:'Accent color'},
+      {name:'sethypesquad', category:'customization', desc:'Set HypeSquad house'},
+      {name:'rpc', category:'customization', desc:'Rich presence commands'},
+      {name:'status', category:'customization', desc:'Online/idle/dnd/invisible'},
+      {name:'statusmessage', category:'customization', desc:'Custom status text'},
+      {name:'device', category:'customization', desc:'Spoof device type'},
+      {name:'theme', category:'customization', desc:'Dark/light/midnight'},
+      {name:'font', category:'customization', desc:'Change font (client-side)'},
+      {name:'fontsize', category:'customization', desc:'Font size'},
+      // moderation (8)
+      {name:'ban', category:'moderation', desc:'Ban a member'},
+      {name:'kick', category:'moderation', desc:'Kick a member'},
+      {name:'mute', category:'moderation', desc:'Server mute a member'},
+      {name:'unmute', category:'moderation', desc:'Unmute'},
+      {name:'nick', category:'moderation', desc:'Change nickname'},
+      {name:'slowmode', category:'moderation', desc:'Set channel slowmode'},
+      {name:'lock', category:'moderation', desc:'Lock channel'},
+      {name:'unlock', category:'moderation', desc:'Unlock channel'},
+      // voice (7)
+      {name:'join', category:'voice', desc:'Join voice channel'},
+      {name:'leave', category:'voice', desc:'Leave voice channel'},
+      {name:'deafen', category:'voice', desc:'Deafen yourself'},
+      {name:'undeafen', category:'voice', desc:'Undeafen'},
+      {name:'mutevoice', category:'voice', desc:'Mute mic'},
+      {name:'unmutevoice', category:'voice', desc:'Unmute mic'},
+      {name:'stream', category:'voice', desc:'Go live'},
+      // friends (5)
+      {name:'friend', category:'friends', desc:'Manage friends'},
+      {name:'block', category:'friends', desc:'Block user'},
+      {name:'unblock', category:'friends', desc:'Unblock user'},
+      {name:'friendlist', category:'friends', desc:'List friends'},
+      {name:'pending', category:'friends', desc:'Pending requests'},
+      // misc (6)
+      {name:'uptime', category:'misc', desc:'Bot uptime'},
+      {name:'invite', category:'misc', desc:'Generate server invite'},
+      {name:'spotify', category:'misc', desc:'Show Spotify status'},
+      {name:'game', category:'misc', desc:'Set game activity'},
+      {name:'streaming', category:'misc', desc:'Set streaming status'},
+      {name:'clearstatus', category:'misc', desc:'Clear all statuses'}
     ];
 
-    // Helper to get all commands (prebuilt + custom)
     function getAllCommands() {
       const merged = [...prebuiltCommands];
       customCommands.forEach(c => merged.push(c));
       return merged;
     }
 
-    // Helper to update localStorage and UI
     function saveState() {
       localStorage.setItem('chromed_prefix', prefix);
       localStorage.setItem('chromed_enabledCmds', JSON.stringify(enabledCommands));
@@ -745,7 +594,6 @@
       renderLogs();
     }
 
-    // ===== UI RENDERING =====
     function renderCommands() {
       const container = document.getElementById('commandList');
       if (!container) return;
@@ -759,7 +607,7 @@
             <div class="command-header">
               <span class="command-name">${cmd.name}</span>
               <label class="toggle">
-                <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="toggleCommand('${cmd.name}')">
+                <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="window.toggleCommand('${cmd.name}')">
                 <span class="slider"></span>
               </label>
             </div>
@@ -775,9 +623,9 @@
       if (!container) return;
       container.innerHTML = autoReplies.map((r, i) => `
         <div class="reply-item">
-          <input value="${r.keyword}" placeholder="Keyword" onchange="updateReply(${i},'keyword',this.value)">
-          <input value="${r.response}" placeholder="Response" onchange="updateReply(${i},'response',this.value)">
-          <button class="danger btn-sm" onclick="removeReply(${i})">✕</button>
+          <input value="${r.keyword}" placeholder="Keyword" onchange="window.updateReply(${i},'keyword',this.value)">
+          <input value="${r.response}" placeholder="Response" onchange="window.updateReply(${i},'response',this.value)">
+          <button class="danger btn-sm" onclick="window.removeReply(${i})">✕</button>
         </div>
       `).join('');
     }
@@ -788,7 +636,7 @@
       container.innerHTML = logs.map(l => `<div class="log-line">[${l.time.slice(11,19)}] ${l.msg}</div>`).join('');
     }
 
-    // ===== ACTIONS =====
+    // Expose functions globally for onclick
     window.toggleCommand = function(name) {
       if (enabledCommands.includes(name)) {
         enabledCommands = enabledCommands.filter(c => c !== name);
@@ -890,7 +738,6 @@
       }
     };
 
-    // Auto‑reply functions
     window.addReply = function() {
       const keyword = document.getElementById('newReplyKeyword').value.trim();
       const response = document.getElementById('newReplyResponse').value.trim();
@@ -915,14 +762,12 @@
       addLog(`Removed auto-reply for "${removed[0].keyword}"`);
     };
 
-    // Device spoof
     window.applyDevice = function() {
       deviceSpoof = document.getElementById('deviceSelect').value;
       saveState();
       addLog(`Device spoof set to "${deviceSpoof}"`);
     };
 
-    // Rich presence save
     window.saveRPC = function() {
       richPresenceConfig = {
         details: document.getElementById('rpcDetails').value,
@@ -943,7 +788,6 @@
       addLog('Rich presence updated');
     };
 
-    // Update UI after auth
     function updateAuthUI(user) {
       document.getElementById('loginPanel').style.display = 'none';
       document.getElementById('dashboardPanels').style.display = 'block';
@@ -963,7 +807,7 @@
       document.getElementById('dashboardPanels').style.display = show ? 'block' : 'none';
     }
 
-    // Panel switching
+    // Panel navigation
     document.querySelectorAll('.sidebar nav a').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -972,20 +816,16 @@
         const panelName = link.dataset.panel;
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         document.getElementById(`panel-${panelName}`).classList.add('active');
-        document.getElementById('panelTitle').textContent = link.textContent.trim();
+        document.getElementById('panelTitle').textContent = link.querySelector('span').textContent;
       });
     });
 
-    // ===== INITIAL LOAD =====
+    // Initialise
     (function init() {
-      // Restore theme
       const savedTheme = localStorage.getItem('theme') || 'dark';
       document.documentElement.setAttribute('data-theme', savedTheme);
-      // Restore prefix input
       document.getElementById('prefixInput').value = prefix;
-      // Restore device select
       document.getElementById('deviceSelect').value = deviceSpoof;
-      // Restore RPC fields
       if (richPresenceConfig) {
         document.getElementById('rpcDetails').value = richPresenceConfig.details || '';
         document.getElementById('rpcState').value = richPresenceConfig.state || '';
@@ -1002,7 +842,6 @@
         document.getElementById('rpcStartTime').value = richPresenceConfig.startTimestamp || '';
       }
 
-      // If token exists, try auto-login
       if (userToken) {
         fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${userToken}` } })
           .then(r => r.json())
@@ -1024,7 +863,6 @@
         toggleDashboard(false);
       }
 
-      // Event listeners
       document.getElementById('connectBtn').addEventListener('click', connectToken);
       document.getElementById('changeTokenBtn').addEventListener('click', changeToken);
       document.getElementById('savePrefixBtn').addEventListener('click', savePrefix);
@@ -1033,15 +871,10 @@
       document.getElementById('saveRpcBtn').addEventListener('click', saveRPC);
       document.getElementById('applyDeviceBtn').addEventListener('click', applyDevice);
       document.getElementById('addReplyBtn').addEventListener('click', addReply);
-      document.getElementById('clearLogsBtn').addEventListener('click', () => {
-        logs = [];
-        saveState();
-        renderLogs();
-      });
+      document.getElementById('clearLogsBtn').addEventListener('click', () => { logs = []; saveState(); renderLogs(); });
       document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
       document.getElementById('resetAllBtn').addEventListener('click', resetAll);
 
-      // Initial rendering
       renderCommands();
       renderAutoReplies();
       renderLogs();
