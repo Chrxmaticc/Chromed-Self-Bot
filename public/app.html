@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chromed – Dashboard</title>
+  <link rel="icon" type="image/png" href="Chromed.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ===== GLOBAL RESET & VARIABLES ===== */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    :root {
+      --glass-bg: rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.08);
+      --glass-hover-bg: rgba(255,255,255,0.1);
+      --card-bg: rgba(255,255,255,0.03);
+      --text-primary: #fff;
+      --text-secondary: #b0b0b0;
+      --accent: #c0c0c0;
+      --shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    [data-theme="light"] {
+      --glass-bg: rgba(255,255,255,0.2);
+      --glass-border: rgba(0,0,0,0.1);
+      --glass-hover-bg: rgba(255,255,255,0.35);
+      --card-bg: rgba(0,0,0,0.02);
+      --text-primary: #111;
+      --text-secondary: #444;
+      --accent: #666;
+      --shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 260px;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      z-index: 10;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 1.5rem 1.5rem;
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+    .sidebar-logo img {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+    }
+    .sidebar nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 1.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      border-radius: 0;
+    }
+    .sidebar nav a:hover,
+    .sidebar nav a.active {
+      background: var(--glass-hover-bg);
+      color: var(--text-primary);
+    }
+    .sidebar-user {
+      margin-top: auto;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-user img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+    .sidebar-user .info {
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-user .name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .sidebar-user .status {
+      font-size: 0.75rem;
+      color: #43b581;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .topbar h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    .token-status {
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #43b581;
+      display: inline-block;
+    }
+    .dot.offline {
+      background: #f04747;
+    }
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+      scrollbar-width: thin;
+    }
+    .content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .content::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 3px;
+    }
+
+    /* ===== PANELS ===== */
+    .panel {
+      display: none;
+    }
+    .panel.active {
+      display: block;
+    }
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+    .grid-2col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+    .stat-label {
+      color: var(--text-secondary);
+    }
+
+    /* Forms */
+    input, select, textarea {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s;
+      width: 100%;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    button:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    button.primary {
+      background: #5865f2;
+      border-color: #5865f2;
+    }
+    button.danger {
+      background: #ed4245;
+      border-color: #ed4245;
+    }
+    .btn-sm {
+      padding: 0.35rem 0.8rem;
+      font-size: 0.8rem;
+    }
+    .token-input-box {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .token-input-box input {
+      flex: 1;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    /* Command list */
+    .command-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .command-item {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: 0.2s;
+    }
+    .command-item:hover {
+      border-color: var(--accent);
+    }
+    .command-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .command-name {
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+    .command-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #444;
+      border-radius: 20px;
+      transition: 0.2s;
+    }
+    .toggle .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle input:checked + .slider {
+      background: #5865f2;
+    }
+    .toggle input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
+    /* Auto‑reply list */
+    .reply-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .reply-item input {
+      flex: 1;
+    }
+    .log-line {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.8rem;
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    /* Responsive sidebar */
+    @media (max-width: 800px) {
+      .sidebar {
+        width: 80px;
+        padding: 1rem 0;
+      }
+      .sidebar nav a span,
+      .sidebar-logo span,
+      .sidebar-user .info {
+        display: none;
+      }
+      .sidebar nav a {
+        justify-content: center;
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="Chromed.png" alt="Chromed">
+      <span>Chromed</span>
+    </div>
+    <nav>
+      <a href="#" data-panel="general" class="active">📊 General</a>
+      <a href="#" data-panel="commands">⚡ Commands</a>
+      <a href="#" data-panel="rpc">🎮 Rich Presence</a>
+      <a href="#" data-panel="device">📱 Device Spoof</a>
+      <a href="#" data-panel="autoreply">💬 Auto-Reply</a>
+      <a href="#" data-panel="logs">📋 Logs</a>
+      <a href="#" data-panel="settings">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-user" id="sidebarUser">
+      <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="avatar">
+      <div class="info">
+        <div class="name" id="sidebarUsername">Not connected</div>
+        <div class="status">Offline</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== MAIN ========== -->
+  <div class="main">
+    <header class="topbar">
+      <h2 id="panelTitle">General</h2>
+      <div class="token-status">
+        <span class="dot offline" id="tokenDot"></span>
+        <span id="tokenLabel">No token</span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- LOGIN PANEL (if no token) -->
+      <div id="loginPanel" style="display:flex; align-items:center; justify-content:center; height:100%;">
+        <div class="glass-card" style="width:100%; max-width:500px;">
+          <h2 class="card-title">Connect your Discord token</h2>
+          <div class="token-input-box">
+            <input type="password" id="tokenInput" placeholder="Paste your user token">
+            <button id="connectBtn" class="primary">Connect</button>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-secondary);">Your token stays local and is never stored on any server. It's only used to talk to Discord's API through your own backend.</p>
+        </div>
+      </div>
+
+      <!-- DASHBOARD PANELS (hidden until token verified) -->
+      <div id="dashboardPanels" style="display:none;">
+
+        <!-- GENERAL PANEL -->
+        <div id="panel-general" class="panel active">
+          <div class="glass-card">
+            <h2 class="card-title">Selfbot Stats</h2>
+            <div class="grid-2col">
+              <div class="stat-item"><span class="stat-value" id="statMessages">0</span><span class="stat-label">Messages sent</span></div>
+              <div class="stat-item"><span class="stat-value" id="statCommands">0</span><span class="stat-label">Commands run</span></div>
+              <div class="stat-item"><span class="stat-value" id="statUptime">0h</span><span class="stat-label">Uptime</span></div>
+              <div class="stat-item"><span class="stat-value" id="statFriends">0</span><span class="stat-label">Friends</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMMANDS PANEL -->
+        <div id="panel-commands" class="panel">
+          <div class="glass-card">
+            <h2 class="card-title">Command Manager</h2>
+            <div style="display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap; align-items:center;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span>Prefix:</span>
+                <input id="prefixInput" style="width:80px;" placeholder="!">
+                <button id="savePrefixBtn">Save</button>
+              </div>
+              <div style="flex:1; display:flex; gap:0.5rem;">
+                <input id="cmdSearch" placeholder="Search commands...">
+              </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+              <button id="addCustomCmdBtn">+ Add Custom</button>
+              <button id="resetCmdsBtn" class="danger">Reset to Default</button>
+            </div>
+            <div class="command-grid" id="commandList"></div>
+          </div>
+        </div>
+
+        <!-- RICH PRESENCE PANEL -->
+        <div id="panel-rpc" class="panel">
+          <div class="glass-card">
+            <h2 class="card-title">Rich Presence</h2>
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+              <div>
+                <label>Details</label>
+                <input id="rpcDetails" placeholder="Playing Chromed">
+              </div>
+              <div>
+                <label>State</label>
+                <input id="rpcState" placeholder="Discord, customized">
+              </div>
+              <div class="grid-2col">
+                <div>
+                  <label>Large Image Key</label>
+                  <input id="rpcLargeImg" placeholder="chromed_logo">
+                </div>
+                <div>
+                  <label>Large Image Text</label>
+                  <input id="rpcLargeImgText" placeholder="Chromed">
+                </div>
+                <div>
+                  <label>Small Image Key</label>
+                  <input id="rpcSmallImg" placeholder="spotify">
+                </div>
+                <div>
+                  <label>Small Image Text</label>
+                  <input id="rpcSmallImgText" placeholder="Listening">
+                </div>
+              </div>
+              <div class="grid-2col">
+                <div>
+                  <label>Button 1 Label</label>
+                  <input id="rpcBtn1Label" placeholder="Invite">
+                </div>
+                <div>
+                  <label>Button 1 URL</label>
+                  <input id="rpcBtn1Url" placeholder="https://discord.gg/...">
+                </div>
+                <div>
+                  <label>Button 2 Label</label>
+                  <input id="rpcBtn2Label" placeholder="Docs">
+                </div>
+                <div>
+                  <label>Button 2 URL</label>
+                  <input id="rpcBtn2Url" placeholder="https://chromed.dev">
+                </div>
+              </div>
+              <div class="grid-2col">
+                <div>
+                  <label>Party Size (current/max)</label>
+                  <input id="rpcPartyCurrent" placeholder="1" style="width:60px; display:inline;">
+                  <span> / </span>
+                  <input id="rpcPartyMax" placeholder="5" style="width:60px; display:inline;">
+                </div>
+                <div>
+                  <label>Start Timestamp (Unix)</label>
+                  <input id="rpcStartTime" placeholder="1680000000">
+                </div>
+              </div>
+              <button id="saveRpcBtn" class="primary">Apply Rich Presence</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEVICE SPOOF PANEL -->
+        <div id="panel-device" class="panel">
+          <div class="glass-card">
+            <h2 class="card-title">Device Spoof</h2>
+            <p style="margin-bottom:1rem;">This gives you a special online status icon (no actual platform change).</p>
+            <select id="deviceSelect">
+              <option value="pc">PC (default)</option>
+              <option value="web">Web</option>
+              <option value="mobile">Mobile</option>
+              <option value="ios">iOS</option>
+              <option value="android">Android</option>
+              <option value="vr">VR</option>
+              <option value="playstation">PlayStation</option>
+              <option value="xbox">Xbox</option>
+            </select>
+            <button id="applyDeviceBtn" class="primary" style="margin-left:0.5rem;">Apply Device</button>
+          </div>
+        </div>
+
+        <!-- AUTO-REPLY PANEL -->
+        <div id="panel-autoreply" class="panel">
+          <div class="glass-card">
+            <h2 class="card-title">Auto-Reply Rules</h2>
+            <div id="autoReplyList"></div>
+            <div class="token-input-box" style="margin-top:1rem;">
+              <input id="newReplyKeyword" placeholder="Keyword">
+              <input id="newReplyResponse" placeholder="Response">
+              <button id="addReplyBtn">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOGS PANEL -->
+        <div id="panel-logs" class="panel">
+          <div class="glass-card">
+            <h2 class="card-title">Activity Logs</h2>
+            <div id="logContainer" style="max-height:400px; overflow-y:auto;"></div>
+            <button id="clearLogsBtn" class="danger" style="margin-top:0.5rem;">Clear Logs</button>
+          </div>
+        </div>
+
+        <!-- SETTINGS PANEL -->
+        <div id="panel-settings" class="panel">
+          <div class="glass-card">
+            <h2 class="card-title">Settings</h2>
+            <div style="margin-bottom:1rem;">
+              <h3>Change Token</h3>
+              <div class="token-input-box">
+                <input type="password" id="newTokenInput" placeholder="New user token">
+                <button id="changeTokenBtn" class="primary">Update</button>
+              </div>
+            </div>
+            <div style="margin-bottom:1rem;">
+              <h3>Theme</h3>
+              <button id="themeToggleBtn">Toggle Light/Dark</button>
+            </div>
+            <button id="resetAllBtn" class="danger">Reset Everything</button>
+          </div>
+        </div>
+      </div> <!-- end dashboardPanels -->
+    </div> <!-- end content -->
+  </div> <!-- end main -->
+
+  <script>
+    // ===== GLOBAL STATE =====
+    const DEFAULT_PREFIX = '!';
+    const API_BASE = '/api';
+    let userToken = localStorage.getItem('chromed_token') || null;
+    let prefix = localStorage.getItem('chromed_prefix') || DEFAULT_PREFIX;
+    let enabledCommands = JSON.parse(localStorage.getItem('chromed_enabledCmds') || '[]');
+    let customCommands = JSON.parse(localStorage.getItem('chromed_customCmds') || '[]');
+    let autoReplies = JSON.parse(localStorage.getItem('chromed_autoReplies') || '[]');
+    let richPresenceConfig = JSON.parse(localStorage.getItem('chromed_rpc') || '{}');
+    let deviceSpoof = localStorage.getItem('chromed_device') || 'pc';
+    let logs = JSON.parse(localStorage.getItem('chromed_logs') || '[]');
+
+    // ---- 100+ pre‑built commands (all lowercase, no emojis) ----
+    const prebuiltCommands = [
+      // utility
+      { name:'ping', category:'utility', desc:'Replies with pong' },
+      { name:'echo', category:'utility', desc:'Repeats your message' },
+      { name:'avatar', category:'utility', desc:'Get user avatar' },
+      { name:'serverinfo', category:'utility', desc:'Shows server info' },
+      { name:'userinfo', category:'utility', desc:'Shows user info' },
+      { name:'calc', category:'utility', desc:'Simple calculator' },
+      { name:'translate', category:'utility', desc:'Translate text' },
+      { name:'qr', category:'utility', desc:'Generate QR code' },
+      { name:'define', category:'utility', desc:'Dictionary definition' },
+      { name:'weather', category:'utility', desc:'Weather for a city' },
+      { name:'timestamp', category:'utility', desc:'Current Unix timestamp' },
+      { name:'color', category:'utility', desc:'Random hex color' },
+      { name:'reminder', category:'utility', desc:'Set a reminder' },
+      { name:'poll', category:'utility', desc:'Create a quick poll' },
+      { name:'choose', category:'utility', desc:'Pick between options' },
+      { name:'purge', category:'utility', desc:'Delete your recent messages' },
+      { name:'send', category:'utility', desc:'Send message to any channel' },
+      { name:'edit', category:'utility', desc:'Edit your message' },
+      { name:'delete', category:'utility', desc:'Delete your message' },
+      { name:'react', category:'utility', desc:'Add reaction to message' },
+      // fun
+      { name:'8ball', category:'fun', desc:'Magic 8-ball' },
+      { name:'roll', category:'fun', desc:'Roll dice' },
+      { name:'coinflip', category:'fun', desc:'Flip a coin' },
+      { name:'reverse', category:'fun', desc:'Reverse text' },
+      { name:'morse', category:'fun', desc:'Text to Morse code' },
+      { name:'tableflip', category:'fun', desc:'(╯°□°）╯︵ ┻━┻' },
+      { name:'unflip', category:'fun', desc:'┬─┬ ノ( ゜-゜ノ)' },
+      { name:'lenny', category:'fun', desc:'( ͡° ͜ʖ ͡°)' },
+      { name:'clap', category:'fun', desc:'👏 Clap 👏 between' },
+      { name:'vaporwave', category:'fun', desc:'Ａｅｓｔｈｅｔｉｃ' },
+      { name:'zalgo', category:'fun', desc:'Cursed text' },
+      { name:'ascii', category:'fun', desc:'Make ASCII art' },
+      { name:'meme', category:'fun', desc:'Random meme' },
+      { name:'joke', category:'fun', desc:'Random joke' },
+      { name:'fact', category:'fun', desc:'Random fact' },
+      { name:'quote', category:'fun', desc:'Inspirational quote' },
+      { name:'rps', category:'fun', desc:'Rock Paper Scissors' },
+      { name:'emojify', category:'fun', desc:'Text to emoji' },
+      { name:'say', category:'fun', desc:'Bot says something' },
+      { name:'randomnumber', category:'fun', desc:'Random number' },
+      // roleplay
+      { name:'slap', category:'roleplay', desc:'Slap a user' },
+      { name:'hug', category:'roleplay', desc:'Hug a user' },
+      { name:'kiss', category:'roleplay', desc:'Kiss a user' },
+      { name:'pat', category:'roleplay', desc:'Pat a user' },
+      { name:'wink', category:'roleplay', desc:'Wink at a user' },
+      { name:'cry', category:'roleplay', desc:'Cry dramatically' },
+      { name:'laugh', category:'roleplay', desc:'Laugh out loud' },
+      { name:'dance', category:'roleplay', desc:'Show off moves' },
+      { name:'shrug', category:'roleplay', desc:'¯\\_(ツ)_/¯' },
+      { name:'poke', category:'roleplay', desc:'Poke a user' },
+      { name:'tickle', category:'roleplay', desc:'Tickle someone' },
+      { name:'bite', category:'roleplay', desc:'Bite someone' },
+      { name:'highfive', category:'roleplay', desc:'High five' },
+      { name:'facepalm', category:'roleplay', desc:'Facepalm' },
+      // images
+      { name:'cat', category:'images', desc:'Random cat picture' },
+      { name:'dog', category:'images', desc:'Random dog picture' },
+      { name:'fox', category:'images', desc:'Random fox picture' },
+      { name:'bird', category:'images', desc:'Random bird picture' },
+      { name:'panda', category:'images', desc:'Random panda picture' },
+      { name:'anime', category:'images', desc:'Random anime image' },
+      { name:'waifu', category:'images', desc:'Random waifu' },
+      { name:'neko', category:'images', desc:'Random neko' },
+      { name:'shibe', category:'images', desc:'Shiba Inu picture' },
+      { name:'capybara', category:'images', desc:'Capybara picture' },
+      // music
+      { name:'lyrics', category:'music', desc:'Get song lyrics' },
+      { name:'play', category:'music', desc:'Play song (Spotify status)' },
+      { name:'stop', category:'music', desc:'Stop music status' },
+      { name:'nowplaying', category:'music', desc:'Show current track' },
+      // customization
+      { name:'setbio', category:'customization', desc:'Change your bio' },
+      { name:'clearbio', category:'customization', desc:'Clear bio' },
+      { name:'setbanner', category:'customization', desc:'Set profile banner' },
+      { name:'setavatar', category:'customization', desc:'Change avatar (client-side)' },
+      { name:'setpronouns', category:'customization', desc:'Set pronouns' },
+      { name:'setaccentcolor', category:'customization', desc:'Accent color' },
+      { name:'sethypesquad', category:'customization', desc:'Set HypeSquad house' },
+      { name:'rpc', category:'customization', desc:'Rich presence commands' },
+      { name:'status', category:'customization', desc:'Online/idle/dnd/invisible' },
+      { name:'statusmessage', category:'customization', desc:'Custom status text' },
+      { name:'device', category:'customization', desc:'Spoof device type' },
+      { name:'theme', category:'customization', desc:'Dark/light/midnight' },
+      { name:'font', category:'customization', desc:'Change font (client-side)' },
+      { name:'fontsize', category:'customization', desc:'Font size' },
+      { name:'nitro', category:'customization', desc:'Nitro simulator' },
+      // moderation
+      { name:'ban', category:'moderation', desc:'Ban a member (needs perms)' },
+      { name:'kick', category:'moderation', desc:'Kick a member' },
+      { name:'mute', category:'moderation', desc:'Server mute a member' },
+      { name:'unmute', category:'moderation', desc:'Unmute' },
+      { name:'nick', category:'moderation', desc:'Change nickname' },
+      { name:'slowmode', category:'moderation', desc:'Set channel slowmode' },
+      { name:'lock', category:'moderation', desc:'Lock channel' },
+      { name:'unlock', category:'moderation', desc:'Unlock channel' },
+      // voice
+      { name:'join', category:'voice', desc:'Join voice channel' },
+      { name:'leave', category:'voice', desc:'Leave voice channel' },
+      { name:'deafen', category:'voice', desc:'Deafen yourself' },
+      { name:'undeafen', category:'voice', desc:'Undeafen' },
+      { name:'mutevoice', category:'voice', desc:'Mute mic' },
+      { name:'unmutevoice', category:'voice', desc:'Unmute mic' },
+      { name:'stream', category:'voice', desc:'Go live' },
+      // friends
+      { name:'friend', category:'friends', desc:'Manage friends' },
+      { name:'block', category:'friends', desc:'Block user' },
+      { name:'unblock', category:'friends', desc:'Unblock user' },
+      { name:'friendlist', category:'friends', desc:'List friends' },
+      { name:'pending', category:'friends', desc:'Pending requests' },
+      // misc
+      { name:'uptime', category:'misc', desc:'Bot uptime' },
+      { name:'invite', category:'misc', desc:'Generate server invite' },
+      { name:'spotify', category:'misc', desc:'Show Spotify status' },
+      { name:'game', category:'misc', desc:'Set game activity' },
+      { name:'streaming', category:'misc', desc:'Set streaming status' },
+      { name:'clearstatus', category:'misc', desc:'Clear all statuses' }
+    ];
+
+    // Helper to get all commands (prebuilt + custom)
+    function getAllCommands() {
+      const merged = [...prebuiltCommands];
+      customCommands.forEach(c => merged.push(c));
+      return merged;
+    }
+
+    // Helper to update localStorage and UI
+    function saveState() {
+      localStorage.setItem('chromed_prefix', prefix);
+      localStorage.setItem('chromed_enabledCmds', JSON.stringify(enabledCommands));
+      localStorage.setItem('chromed_customCmds', JSON.stringify(customCommands));
+      localStorage.setItem('chromed_autoReplies', JSON.stringify(autoReplies));
+      localStorage.setItem('chromed_rpc', JSON.stringify(richPresenceConfig));
+      localStorage.setItem('chromed_device', deviceSpoof);
+      localStorage.setItem('chromed_logs', JSON.stringify(logs));
+    }
+
+    function addLog(message) {
+      logs.unshift({ time: new Date().toISOString(), msg: message });
+      if (logs.length > 50) logs.pop();
+      saveState();
+      renderLogs();
+    }
+
+    // ===== UI RENDERING =====
+    function renderCommands() {
+      const container = document.getElementById('commandList');
+      if (!container) return;
+      const all = getAllCommands();
+      const search = document.getElementById('cmdSearch')?.value.toLowerCase() || '';
+      const filtered = all.filter(c => c.name.includes(search) || c.desc.toLowerCase().includes(search));
+      container.innerHTML = filtered.map(cmd => {
+        const isEnabled = enabledCommands.includes(cmd.name);
+        return `
+          <div class="command-item">
+            <div class="command-header">
+              <span class="command-name">${cmd.name}</span>
+              <label class="toggle">
+                <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="toggleCommand('${cmd.name}')">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="command-desc">${cmd.desc}</div>
+            <div style="font-size:0.7rem; color:#888;">${cmd.category}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAutoReplies() {
+      const container = document.getElementById('autoReplyList');
+      if (!container) return;
+      container.innerHTML = autoReplies.map((r, i) => `
+        <div class="reply-item">
+          <input value="${r.keyword}" placeholder="Keyword" onchange="updateReply(${i},'keyword',this.value)">
+          <input value="${r.response}" placeholder="Response" onchange="updateReply(${i},'response',this.value)">
+          <button class="danger btn-sm" onclick="removeReply(${i})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function renderLogs() {
+      const container = document.getElementById('logContainer');
+      if (!container) return;
+      container.innerHTML = logs.map(l => `<div class="log-line">[${l.time.slice(11,19)}] ${l.msg}</div>`).join('');
+    }
+
+    // ===== ACTIONS =====
+    window.toggleCommand = function(name) {
+      if (enabledCommands.includes(name)) {
+        enabledCommands = enabledCommands.filter(c => c !== name);
+      } else {
+        enabledCommands.push(name);
+      }
+      saveState();
+      addLog(`Toggled command "${name}"`);
+    };
+
+    window.addCustomCommand = function() {
+      const name = prompt('Command name (lowercase, no spaces):');
+      if (!name || name.includes(' ')) return alert('Invalid name');
+      const desc = prompt('Description:') || 'Custom command';
+      if (getAllCommands().some(c => c.name === name)) return alert('Already exists');
+      customCommands.push({ name, category:'custom', desc });
+      saveState();
+      renderCommands();
+      addLog(`Added custom command "${name}"`);
+    };
+
+    window.resetCommands = function() {
+      if (confirm('Reset all commands to default?')) {
+        enabledCommands = [];
+        customCommands = [];
+        saveState();
+        renderCommands();
+        addLog('Commands reset to default');
+      }
+    };
+
+    window.savePrefix = function() {
+      const newPrefix = document.getElementById('prefixInput').value.trim();
+      if (!newPrefix) return alert('Prefix required');
+      prefix = newPrefix;
+      saveState();
+      addLog(`Prefix changed to "${prefix}"`);
+    };
+
+    window.connectToken = async function() {
+      const token = document.getElementById('tokenInput').value.trim();
+      if (!token) return alert('Token required');
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        userToken = token;
+        localStorage.setItem('chromed_token', token);
+        updateAuthUI(data.user);
+        addLog('Connected successfully');
+      } catch(e) {
+        alert('Invalid token: ' + e.message);
+      }
+    };
+
+    window.changeToken = async function() {
+      const newToken = document.getElementById('newTokenInput').value.trim();
+      if (!newToken) return alert('Token required');
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ token: newToken })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        userToken = newToken;
+        localStorage.setItem('chromed_token', newToken);
+        updateAuthUI(data.user);
+        addLog('Token updated');
+      } catch(e) {
+        alert('Invalid token: ' + e.message);
+      }
+    };
+
+    window.logout = function() {
+      if (confirm('Logout?')) {
+        userToken = null;
+        localStorage.removeItem('chromed_token');
+        toggleDashboard(false);
+      }
+    };
+
+    window.toggleTheme = function() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    };
+
+    window.resetAll = function() {
+      if (confirm('This will erase all settings and disconnect. Continue?')) {
+        localStorage.clear();
+        location.reload();
+      }
+    };
+
+    // Auto‑reply functions
+    window.addReply = function() {
+      const keyword = document.getElementById('newReplyKeyword').value.trim();
+      const response = document.getElementById('newReplyResponse').value.trim();
+      if (!keyword || !response) return;
+      autoReplies.push({ keyword, response });
+      saveState();
+      renderAutoReplies();
+      addLog(`Added auto-reply for "${keyword}"`);
+      document.getElementById('newReplyKeyword').value = '';
+      document.getElementById('newReplyResponse').value = '';
+    };
+
+    window.updateReply = function(index, field, value) {
+      autoReplies[index][field] = value;
+      saveState();
+    };
+
+    window.removeReply = function(index) {
+      const removed = autoReplies.splice(index, 1);
+      saveState();
+      renderAutoReplies();
+      addLog(`Removed auto-reply for "${removed[0].keyword}"`);
+    };
+
+    // Device spoof
+    window.applyDevice = function() {
+      deviceSpoof = document.getElementById('deviceSelect').value;
+      saveState();
+      addLog(`Device spoof set to "${deviceSpoof}"`);
+    };
+
+    // Rich presence save
+    window.saveRPC = function() {
+      richPresenceConfig = {
+        details: document.getElementById('rpcDetails').value,
+        state: document.getElementById('rpcState').value,
+        largeImageKey: document.getElementById('rpcLargeImg').value,
+        largeImageText: document.getElementById('rpcLargeImgText').value,
+        smallImageKey: document.getElementById('rpcSmallImg').value,
+        smallImageText: document.getElementById('rpcSmallImgText').value,
+        button1Label: document.getElementById('rpcBtn1Label').value,
+        button1Url: document.getElementById('rpcBtn1Url').value,
+        button2Label: document.getElementById('rpcBtn2Label').value,
+        button2Url: document.getElementById('rpcBtn2Url').value,
+        partyCurrent: document.getElementById('rpcPartyCurrent').value,
+        partyMax: document.getElementById('rpcPartyMax').value,
+        startTimestamp: document.getElementById('rpcStartTime').value
+      };
+      saveState();
+      addLog('Rich presence updated');
+    };
+
+    // Update UI after auth
+    function updateAuthUI(user) {
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('dashboardPanels').style.display = 'block';
+      document.getElementById('tokenDot').classList.remove('offline');
+      document.getElementById('tokenLabel').textContent = 'Connected';
+      if (user) {
+        document.getElementById('sidebarUsername').textContent = user.username;
+        const avatarUrl = user.avatar
+          ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+          : `https://cdn.discordapp.com/embed/avatars/${user.discriminator%5}.png`;
+        document.querySelector('#sidebarUser img').src = avatarUrl;
+      }
+    }
+
+    function toggleDashboard(show) {
+      document.getElementById('loginPanel').style.display = show ? 'none' : 'flex';
+      document.getElementById('dashboardPanels').style.display = show ? 'block' : 'none';
+    }
+
+    // Panel switching
+    document.querySelectorAll('.sidebar nav a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+        const panelName = link.dataset.panel;
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`panel-${panelName}`).classList.add('active');
+        document.getElementById('panelTitle').textContent = link.textContent.trim();
+      });
+    });
+
+    // ===== INITIAL LOAD =====
+    (function init() {
+      // Restore theme
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      // Restore prefix input
+      document.getElementById('prefixInput').value = prefix;
+      // Restore device select
+      document.getElementById('deviceSelect').value = deviceSpoof;
+      // Restore RPC fields
+      if (richPresenceConfig) {
+        document.getElementById('rpcDetails').value = richPresenceConfig.details || '';
+        document.getElementById('rpcState').value = richPresenceConfig.state || '';
+        document.getElementById('rpcLargeImg').value = richPresenceConfig.largeImageKey || '';
+        document.getElementById('rpcLargeImgText').value = richPresenceConfig.largeImageText || '';
+        document.getElementById('rpcSmallImg').value = richPresenceConfig.smallImageKey || '';
+        document.getElementById('rpcSmallImgText').value = richPresenceConfig.smallImageText || '';
+        document.getElementById('rpcBtn1Label').value = richPresenceConfig.button1Label || '';
+        document.getElementById('rpcBtn1Url').value = richPresenceConfig.button1Url || '';
+        document.getElementById('rpcBtn2Label').value = richPresenceConfig.button2Label || '';
+        document.getElementById('rpcBtn2Url').value = richPresenceConfig.button2Url || '';
+        document.getElementById('rpcPartyCurrent').value = richPresenceConfig.partyCurrent || '';
+        document.getElementById('rpcPartyMax').value = richPresenceConfig.partyMax || '';
+        document.getElementById('rpcStartTime').value = richPresenceConfig.startTimestamp || '';
+      }
+
+      // If token exists, try auto-login
+      if (userToken) {
+        fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${userToken}` } })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              updateAuthUI(data.user);
+            } else {
+              userToken = null;
+              localStorage.removeItem('chromed_token');
+              toggleDashboard(false);
+            }
+          })
+          .catch(() => {
+            userToken = null;
+            localStorage.removeItem('chromed_token');
+            toggleDashboard(false);
+          });
+      } else {
+        toggleDashboard(false);
+      }
+
+      // Event listeners
+      document.getElementById('connectBtn').addEventListener('click', connectToken);
+      document.getElementById('changeTokenBtn').addEventListener('click', changeToken);
+      document.getElementById('savePrefixBtn').addEventListener('click', savePrefix);
+      document.getElementById('addCustomCmdBtn').addEventListener('click', addCustomCommand);
+      document.getElementById('resetCmdsBtn').addEventListener('click', resetCommands);
+      document.getElementById('saveRpcBtn').addEventListener('click', saveRPC);
+      document.getElementById('applyDeviceBtn').addEventListener('click', applyDevice);
+      document.getElementById('addReplyBtn').addEventListener('click', addReply);
+      document.getElementById('clearLogsBtn').addEventListener('click', () => {
+        logs = [];
+        saveState();
+        renderLogs();
+      });
+      document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+      document.getElementById('resetAllBtn').addEventListener('click', resetAll);
+
+      // Initial rendering
+      renderCommands();
+      renderAutoReplies();
+      renderLogs();
+    })();
+  </script>
+</body>
+</html>
